@@ -1,5 +1,5 @@
 (defproject overtone-roland-a300 "0.0.0"
-  :description "Events for the strange way I use my Roland A-300 
+  :description "Wrapper events for the strange way I use my Roland A-300 
                midi keyboard in overtone"
   :url "https://github.com/justinvdm/overtone-roland-a300"
   :license {:name "MIT"}

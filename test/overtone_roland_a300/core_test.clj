@@ -20,7 +20,7 @@
                            (remove-handler ::test)]))
 
 (facts
-  "about :midi :key events"
+  "about keyboard events"
 
   (fact
     ":midi :key :down events are triggered on key presses"
@@ -79,7 +79,7 @@
                   :data2 0}]))
 
 (facts
-  "about :midi :bend events"
+  "about bender events"
 
   (fact
     ":midi :bend events are triggered when the bender is bent left or right"
@@ -90,86 +90,248 @@
     (control-change 6 1 0)
 
     @records => [{:status nil,
-      :note 1,
-      :timestamp 613092694,
-      :velocity 127,
-      :data1 1,
-      :bending 63,
-      :channel 6,
-      :command :control-change,
-      :velocity-f 1,
-      :data2-f 1,
-      :bending-f 63/127,
-      :data2 127}
-     {:status nil,
-      :note 1,
-      :timestamp 613092694,
-      :velocity 64,
-      :data1 1,
-      :bending 0,
-      :channel 6,
-      :command :control-change,
-      :velocity-f 64/127,
-      :data2-f 64/127,
-      :bending-f 0,
-      :data2 64}
-     {:status nil,
-      :note 1,
-      :timestamp 613092694,
-      :velocity 0,
-      :data1 1,
-      :bending -64,
-      :channel 6,
-      :command :control-change,
-      :velocity-f 0,
-      :data2-f 0,
-      :bending-f -64/127,
-      :data2 0}]))
-
-(facts
-  "about :midi :mod events"
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 1,
+                  :bending 63,
+                  :channel 6,
+                  :command :control-change,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :bending-f 63/127,
+                  :data2 127}
+                 {:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 64,
+                  :data1 1,
+                  :bending 0,
+                  :channel 6,
+                  :command :control-change,
+                  :velocity-f 64/127,
+                  :data2-f 64/127,
+                  :bending-f 0,
+                  :data2 64}
+                 {:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 1,
+                  :bending -64,
+                  :channel 6,
+                  :command :control-change,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :bending-f -64/127,
+                  :data2 0}])
 
   (fact
-    ":midi :mod events are triggered when the bender is bent upwards"
-    (record-event [:midi :mod])
+      ":midi :mod events are triggered when the bender is bent upwards"
+      (record-event [:midi :mod])
 
-    (control-change 7 1 0)
-    (control-change 7 1 64)
-    (control-change 7 1 127)
+      (control-change 7 1 0)
+      (control-change 7 1 64)
+      (control-change 7 1 127)
+
+      @records => [{:status nil,
+                    :note 1,
+                    :timestamp 613092694,
+                    :velocity 0,
+                    :data1 1,
+                    :value-f 0,
+                    :channel 7,
+                    :command :control-change,
+                    :velocity-f 0,
+                    :data2-f 0,
+                    :data2 0,
+                    :value 0}
+                   {:status nil,
+                    :note 1,
+                    :timestamp 613092694,
+                    :velocity 64,
+                    :data1 1,
+                    :value-f 64/127,
+                    :channel 7,
+                    :command :control-change,
+                    :velocity-f 64/127,
+                    :data2-f 64/127,
+                    :data2 64,
+                    :value 64}
+                   {:status nil,
+                    :note 1,
+                    :timestamp 613092694,
+                    :velocity 127,
+                    :data1 1,
+                    :value-f 1,
+                    :channel 7,
+                    :command :control-change,
+                    :velocity-f 1,
+                    :data2-f 1,
+                    :data2 127,
+                    :value 127}]))
+
+(facts
+  "about pad events"
+
+  (fact
+    ":midi :pad :down events are triggered when a pad is pressed"
+    (record-event [:midi :pad :down])
+
+    (note-on 5 1 32)
+    (note-on 5 1 64)
+    (note-on 5 1 127)
 
     @records => [{:status nil,
-      :note 1,
-      :timestamp 613092694,
-      :velocity 0,
-      :data1 1,
-      :value-f 0,
-      :channel 7,
-      :command :control-change,
-      :velocity-f 0,
-      :data2-f 0,
-      :data2 0,
-      :value 0}
-     {:status nil,
-      :note 1,
-      :timestamp 613092694,
-      :velocity 64,
-      :data1 1,
-      :value-f 64/127,
-      :channel 7,
-      :command :control-change,
-      :velocity-f 64/127,
-      :data2-f 64/127,
-      :data2 64,
-      :value 64}
-     {:status nil,
-      :note 1,
-      :timestamp 613092694,
-      :velocity 127,
-      :data1 1,
-      :value-f 1,
-      :channel 7,
-      :command :control-change,
-      :velocity-f 1,
-      :data2-f 1,
-      :data2 127,
-      :value 127}]))
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 32,
+                  :data1 1,
+                  :channel 5,
+                  :command :note-on,
+                  :velocity-f 32/127,
+                  :data2-f 32/127,
+                  :data2 32}
+                 {:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 64,
+                  :data1 1,
+                  :channel 5,
+                  :command :note-on,
+                  :velocity-f 64/127,
+                  :data2-f 64/127,
+                  :data2 64}
+                 {:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 1,
+                  :channel 5,
+                  :command :note-on,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}])
+
+  (fact
+    ":midi :pad<n> :down events are triggered when pad n is pressed"
+    (record-event [:midi :pad1 :down])
+    (note-on 5 1 127)
+
+    (record-event [:midi :pad2 :down])
+    (note-on 5 2 127)
+
+    (record-event [:midi :pad3 :down])
+    (note-on 5 3 127)
+
+    @records => [{:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 1,
+                  :channel 5,
+                  :command :note-on,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}
+                 {:status nil,
+                  :note 2,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 2,
+                  :channel 5,
+                  :command :note-on,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}
+                 {:status nil,
+                  :note 3,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 3,
+                  :channel 5,
+                  :command :note-on,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}])
+
+  (fact
+    ":midi :pad :up events are triggered when a pad is released"
+    (record-event [:midi :pad :up])
+
+    (note-off 5 1)
+    (note-off 5 2)
+    (note-off 5 3)
+
+    @records => [{:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 1,
+                  :channel 5,
+                  :command :note-off,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}
+                 {:status nil,
+                  :note 2,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 2,
+                  :channel 5,
+                  :command :note-off,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}
+                 {:status nil,
+                  :note 3,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 3,
+                  :channel 5,
+                  :command :note-off,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}])
+
+  (fact
+    ":midi :pad<n> :up events are triggered when pad n is released"
+    (record-event [:midi :pad1 :up])
+    (note-off 5 1)
+
+    (record-event [:midi :pad2 :up])
+    (note-off 5 2)
+
+    (record-event [:midi :pad3 :up])
+    (note-off 5 3)
+
+    @records => [{:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 1,
+                  :channel 5,
+                  :command :note-off,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}
+                 {:status nil,
+                  :note 2,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 2,
+                  :channel 5,
+                  :command :note-off,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}
+                 {:status nil,
+                  :note 3,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 3,
+                  :channel 5,
+                  :command :note-off,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}]))

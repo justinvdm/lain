@@ -38,17 +38,19 @@
              :value-f (:velocity-f e))))
 
 (defn- pad-event [e]
-  (let [pad-name (join "pad" (:note e))
-        is-down (= (:note e) :note-on)
+  (let [pad-num (:note e)
+        pad-name (join ["pad" (str pad-num)])
+        is-down (= (:command e) :note-on)
         direction (if is-down :down :up)]
     (event [:midi :pad direction] e)
-    (event [:midi pad-name direction] e)))
+    (event [:midi (keyword pad-name) direction] e)))
 
 (defn- control-event [e]
   (let [channel-num (:channel e)
         control-num (:note e)
         control-range (get-channel (:channel e))
-        channel (join (name control-range) control-num)]
+        channel (join [(name control-range)
+                       (str control-num)])]
     (event
       [:midi (keyword channel)]
       (assoc e :value (:velocity e)

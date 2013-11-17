@@ -335,3 +335,279 @@
                   :velocity-f 0,
                   :data2-f 0,
                   :data2 0}]))
+
+(facts
+  "about events for buttons b1-b4"
+
+  (fact
+    ":midi :b<n> :on events are triggered when button bn is enabled"
+    (record-event [:midi :b1 :on])
+    (control-change 1 1 127)
+
+    (record-event [:midi :b2 :on])
+    (control-change 1 2 127)
+
+    (record-event [:midi :b3 :on])
+    (control-change 1 3 127)
+
+    @records => [{:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 1,
+                  :channel 1,
+                  :command :control-change,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}
+                 {:status nil,
+                  :note 2,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 2,
+                  :channel 1,
+                  :command :control-change,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}
+                 {:status nil,
+                  :note 3,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 3,
+                  :channel 1,
+                  :command :control-change,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}])
+
+  (fact
+    ":midi :b<n> :off events are triggered when button bn is disab;ed"
+    (record-event [:midi :b1 :off])
+    (control-change 1 1 0)
+
+    (record-event [:midi :b2 :off])
+    (control-change 1 2 0)
+
+    (record-event [:midi :b3 :off])
+    (control-change 1 3 0)
+
+    @records => [{:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 1,
+                  :channel 1,
+                  :command :control-change,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}
+                 {:status nil,
+                  :note 2,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 2,
+                  :channel 1,
+                  :command :control-change,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}
+                 {:status nil,
+                  :note 3,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 3,
+                  :channel 1,
+                  :command :control-change,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}]))
+
+(facts
+  "about events for buttons l1-b9"
+
+  (fact
+    ":midi :l<n> :on events are triggered when button bn is enabled"
+    (record-event [:midi :l1 :on])
+    (control-change 2 1 127)
+
+    (record-event [:midi :l2 :on])
+    (control-change 2 2 127)
+
+    (record-event [:midi :l3 :on])
+    (control-change 2 3 127)
+
+    @records => [{:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 1,
+                  :channel 2,
+                  :command :control-change,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}
+                 {:status nil,
+                  :note 2,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 2,
+                  :channel 2,
+                  :command :control-change,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}
+                 {:status nil,
+                  :note 3,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 3,
+                  :channel 2,
+                  :command :control-change,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127}])
+
+  (fact
+    ":midi :l<n> :off events are triggered when button bn is disab;ed"
+    (record-event [:midi :l1 :off])
+    (control-change 2 1 0)
+
+    (record-event [:midi :l2 :off])
+    (control-change 2 2 0)
+
+    (record-event [:midi :l3 :off])
+    (control-change 2 3 0)
+
+    @records => [{:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 1,
+                  :channel 2,
+                  :command :control-change,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}
+                 {:status nil,
+                  :note 2,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 2,
+                  :channel 2,
+                  :command :control-change,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}
+                 {:status nil,
+                  :note 3,
+                  :timestamp 613092694,
+                  :velocity 0,
+                  :data1 3,
+                  :channel 2,
+                  :command :control-change,
+                  :velocity-f 0,
+                  :data2-f 0,
+                  :data2 0}]))
+
+(facts
+  "about events for buttons r1-r9"
+
+  (fact
+    ":midi :r<n> events are triggered when knob rn is turned"
+    (record-event [:midi :r1])
+    (control-change 3 1 32)
+
+    (record-event [:midi :r2])
+    (control-change 3 2 64)
+
+    (record-event [:midi :r3])
+    (control-change 3 3 127)
+
+    @records => [{:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 32,
+                  :data1 1,
+                  :value-f 32/127,
+                  :channel 3,
+                  :command :control-change,
+                  :velocity-f 32/127,
+                  :data2-f 32/127,
+                  :data2 32,
+                  :value 32}
+                 {:status nil,
+                  :note 2,
+                  :timestamp 613092694,
+                  :velocity 64,
+                  :data1 2,
+                  :value-f 64/127,
+                  :channel 3,
+                  :command :control-change,
+                  :velocity-f 64/127,
+                  :data2-f 64/127,
+                  :data2 64,
+                  :value 64}
+                 {:status nil,
+                  :note 3,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 3,
+                  :value-f 1,
+                  :channel 3,
+                  :command :control-change,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127,
+                  :value 127}]))
+
+(facts
+  "about events for sliders s1-s9"
+
+  (fact
+    ":midi :s<n> events are triggered when slider sn is slided"
+    (record-event [:midi :s1])
+    (control-change 4 1 32)
+
+    (record-event [:midi :s2])
+    (control-change 4 2 64)
+
+    (record-event [:midi :s3])
+    (control-change 4 3 127)
+
+    @records => [{:status nil,
+                  :note 1,
+                  :timestamp 613092694,
+                  :velocity 32,
+                  :data1 1,
+                  :value-f 32/127,
+                  :channel 4,
+                  :command :control-change,
+                  :velocity-f 32/127,
+                  :data2-f 32/127,
+                  :data2 32,
+                  :value 32}
+                 {:status nil,
+                  :note 2,
+                  :timestamp 613092694,
+                  :velocity 64,
+                  :data1 2,
+                  :value-f 64/127,
+                  :channel 4,
+                  :command :control-change,
+                  :velocity-f 64/127,
+                  :data2-f 64/127,
+                  :data2 64,
+                  :value 64}
+                 {:status nil,
+                  :note 3,
+                  :timestamp 613092694,
+                  :velocity 127,
+                  :data1 3,
+                  :value-f 1,
+                  :channel 4,
+                  :command :control-change,
+                  :velocity-f 1,
+                  :data2-f 1,
+                  :data2 127,
+                  :value 127}]))

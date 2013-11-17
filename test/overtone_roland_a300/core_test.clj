@@ -28,8 +28,6 @@
     (note-on 0 1 127)
     (note-on 0 60 64)
 
-    (Thread/sleep 100)
-
     @records => [{:status nil
                   :note 1
                   :timestamp 613092694
@@ -57,8 +55,6 @@
 
     (note-off 0 1)
     (note-off 0 60)
-
-    (Thread/sleep 100)
 
     @records => [{:status nil
                   :note 1

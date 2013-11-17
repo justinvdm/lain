@@ -18,7 +18,8 @@
        :command event-type
        :velocity-f velocity-f
        :data2-f velocity-f
-       :data2 velocity})))
+       :data2 velocity})
+    (Thread/sleep 50)))
 
 (defn control-change [channel note velocity]
   (fake-event :control-change channel note velocity))

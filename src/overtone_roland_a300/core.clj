@@ -40,31 +40,42 @@
 (defn- pad-event [e]
   (let [pad-num (:note e)
         pad-name (join ["pad" (str pad-num)])
+        pad-name (keyword pad-name)
         is-down (= (:command e) :note-on)
         direction (if is-down :down :up)]
     (event [:midi :pad direction] e)
-    (event [:midi (keyword pad-name) direction] e)))
+    (event [:midi pad-name direction] e)))
 
-(defn- control-event [e]
+(defn- get-control-name [e]
   (let [channel-num (:channel e)
         control-num (:note e)
-        control-range (get-channel (:channel e))
-        channel (join [(name control-range)
-                       (str control-num)])]
-    (event
-      [:midi (keyword channel)]
-      (assoc e :value (:velocity e)
-               :value-f (:velocity-f e)))))
+        control-range (get-channel (:channel e))]
+    (-> [(name control-range)
+         (str control-num)]
+        join
+        keyword)))
+
+(defn- fuzzy-event [e]
+  (event
+    [:midi (get-control-name e)]
+    (assoc e :value (:velocity e)
+             :value-f (:velocity-f e))))
+
+(defn- toggle-event [e]
+  (let [control-name (get-control-name e)
+        is-on (= 127 (:velocity e))
+        status (if is-on :on :off)]
+    (event [:midi control-name status] e)))
 
 (def ^:private channel-handlers
   {:key key-event
    :bend bend-event
    :mod mod-event
    :pad pad-event
-   :b control-event
-   :l control-event
-   :r control-event
-   :s control-event})
+   :b toggle-event
+   :l toggle-event
+   :r fuzzy-event
+   :s fuzzy-event})
 
 (defn- handle-event [e]
   (let [channel (get-channel (:channel e))

@@ -82,7 +82,7 @@
   "about :midi :bend events"
 
   (fact
-    ":midi :bend events are triggered when the bender is bent"
+    ":midi :bend events are triggered when the bender is bent left or right"
     (record-event [:midi :bend])
 
     (control-change 6 1 127)
@@ -125,3 +125,51 @@
       :data2-f 0,
       :bending-f -64/127,
       :data2 0}]))
+
+(facts
+  "about :midi :mod events"
+
+  (fact
+    ":midi :mod events are triggered when the bender is bent upwards"
+    (record-event [:midi :mod])
+
+    (control-change 7 1 0)
+    (control-change 7 1 64)
+    (control-change 7 1 127)
+
+    @records => [{:status nil,
+      :note 1,
+      :timestamp 613092694,
+      :velocity 0,
+      :data1 1,
+      :value-f 0,
+      :channel 7,
+      :command :control-change,
+      :velocity-f 0,
+      :data2-f 0,
+      :data2 0,
+      :value 0}
+     {:status nil,
+      :note 1,
+      :timestamp 613092694,
+      :velocity 64,
+      :data1 1,
+      :value-f 64/127,
+      :channel 7,
+      :command :control-change,
+      :velocity-f 64/127,
+      :data2-f 64/127,
+      :data2 64,
+      :value 64}
+     {:status nil,
+      :note 1,
+      :timestamp 613092694,
+      :velocity 127,
+      :data1 1,
+      :value-f 1,
+      :channel 7,
+      :command :control-change,
+      :velocity-f 1,
+      :data2-f 1,
+      :data2 127,
+      :value 127}]))

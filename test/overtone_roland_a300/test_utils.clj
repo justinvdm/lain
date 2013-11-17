@@ -1,4 +1,4 @@
-(ns overtone-roland-a300.fake-midi
+(ns overtone-roland-a300.test-utils
   (:require [overtone.libs.event :refer [event]]))
 
 (defn fake-event
@@ -20,19 +20,11 @@
        :data2-f velocity-f
        :data2 velocity})))
 
-(defn control-change
-  [channel
-   note
-   velocity]
+(defn control-change [channel note velocity]
   (fake-event :control-change channel note velocity))
 
-(defn note-on
-  [channel
-   note
-   velocity]
+(defn note-on [channel note velocity]
   (fake-event :note-on channel note velocity))
 
-(defn note-off
-  [channel
-   note]
-  (fake-event :note-on channel note 0))
+(defn note-off [channel note]
+  (fake-event :note-off channel note 0))

@@ -27,9 +27,9 @@
         bending (- position 64)
         bending-f (/ bending 127)]
     (event
-      [:midi :bend])
+      [:midi :bend]
       (assoc e :bending bending
-               :bending-f bending-f)))
+               :bending-f bending-f))))
 
 (defn- mod-event [e]
   (event

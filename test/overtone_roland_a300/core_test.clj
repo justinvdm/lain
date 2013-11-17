@@ -21,6 +21,7 @@
 
 (facts
   "about :midi :key events"
+
   (fact
     ":midi :key :down events are triggered on key presses"
     (record-event [:midi :key :down])
@@ -76,3 +77,51 @@
                   :velocity-f 0
                   :data2-f 0
                   :data2 0}]))
+
+(facts
+  "about :midi :bend events"
+
+  (fact
+    ":midi :bend events are triggered when the bender is bent"
+    (record-event [:midi :bend])
+
+    (control-change 6 1 127)
+    (control-change 6 1 64)
+    (control-change 6 1 0)
+
+    @records => [{:status nil,
+      :note 1,
+      :timestamp 613092694,
+      :velocity 127,
+      :data1 1,
+      :bending 63,
+      :channel 6,
+      :command :control-change,
+      :velocity-f 1,
+      :data2-f 1,
+      :bending-f 63/127,
+      :data2 127}
+     {:status nil,
+      :note 1,
+      :timestamp 613092694,
+      :velocity 64,
+      :data1 1,
+      :bending 0,
+      :channel 6,
+      :command :control-change,
+      :velocity-f 64/127,
+      :data2-f 64/127,
+      :bending-f 0,
+      :data2 64}
+     {:status nil,
+      :note 1,
+      :timestamp 613092694,
+      :velocity 0,
+      :data1 1,
+      :bending -64,
+      :channel 6,
+      :command :control-change,
+      :velocity-f 0,
+      :data2-f 0,
+      :bending-f -64/127,
+      :data2 0}]))

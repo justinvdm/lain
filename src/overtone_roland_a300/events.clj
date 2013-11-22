@@ -1,6 +1,5 @@
 (ns overtone-roland-a300.events
   (:require [clojure.string :refer [join]]
-            [midje.sweet :refer :all]
             [overtone.libs.event :refer [event
                                          on-event
                                          remove-handler]]))

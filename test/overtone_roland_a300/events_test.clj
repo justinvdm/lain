@@ -1,9 +1,9 @@
-(ns overtone-roland-a300.core-test
+(ns overtone-roland-a300.events-test
   (:require [midje.sweet :refer :all]
             [overtone.libs.event :refer [event
                                          on-event
                                          remove-handler]]
-            [overtone-roland-a300.core :refer :all]
+            [overtone-roland-a300.events :refer :all]
             [overtone-roland-a300.test-utils :refer :all]))
 
 (def records (atom []))
@@ -17,7 +17,9 @@
   (reset! records []))
 
 (background (after :facts [(clear-records)
-                           (remove-handler ::test)]))
+                           (remove-handler ::test)
+                           (remove-a300-event-handlers)])
+            (before :facts [(handle-a300-events)]))
 
 (facts
   "about keyboard events"

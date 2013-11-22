@@ -15,7 +15,9 @@
 (defn clear-records []
   (reset! records []))
 
-(describe "a300 events"
+(describe
+  "a300 events"
+
   (before
      [(handle-a300-events)])
 
@@ -24,8 +26,10 @@
      (remove-handler ::test)
      (remove-a300-event-handlers)])
 
-  (describe "keyboard events"
-    (it "should trigger :key :down events on key presses"
+  (describe
+    "keyboard events"
+    (it
+      "should trigger :key :down events on key presses"
       (record-event [:midi :key :down])
 
       (note-on 0 1 127)
@@ -52,7 +56,8 @@
                     :data2-f 64/127
                     :data2 64}]))
 
-    (it "should trigger midi :key :up events on key releases"
+    (it
+      "should trigger midi :key :up events on key releases"
       (record-event [:midi :key :up])
 
       (note-off 0 1)
@@ -79,8 +84,10 @@
                     :data2-f 0
                     :data2 0}])))
 
-  (describe "bender events"
-    (it "should trigger midi :bend events when the bender is bent left or right"
+  (describe
+    "bender events"
+    (it
+      "should trigger midi :bend events when the bender is bent left or right"
       (record-event [:midi :bend])
 
       (control-change 6 1 127)
@@ -124,7 +131,8 @@
                     :bending-f -64/127,
                     :data2 0}]))
 
-    (it "should trigger midi :mod events when the bender is bent upwards"
+    (it
+      "should trigger midi :mod events when the bender is bent upwards"
         (record-event [:midi :mod])
 
         (control-change 7 1 0)
@@ -168,8 +176,10 @@
                       :data2 127,
                       :value 127}])))
 
-  (describe "pad events"
-    (it "should trigger midi :pad :down events when a pad is pressed"
+  (describe
+    "pad events"
+    (it
+      "should trigger midi :pad :down events when a pad is pressed"
       (record-event [:midi :pad :down])
 
       (note-on 5 1 32)
@@ -207,7 +217,8 @@
                     :data2-f 1,
                     :data2 127}]))
 
-    (it "should trigger :midi :pad<n> :down events when pad n is pressed"
+    (it
+      "should trigger :midi :pad<n> :down events when pad n is pressed"
       (record-event [:midi :pad1 :down])
       (note-on 5 1 127)
 
@@ -248,7 +259,8 @@
                     :data2-f 1,
                     :data2 127}]))
 
-    (it "should trigger :midi :pad :up events when a pad is released"
+    (it
+      "should trigger :midi :pad :up events when a pad is released"
       (record-event [:midi :pad :up])
 
       (note-off 5 1)
@@ -286,7 +298,8 @@
                     :data2-f 0,
                     :data2 0}]))
 
-    (it "should trigger :midi :pad<n> :up events when pad n is released"
+    (it
+      "should trigger :midi :pad<n> :up events when pad n is released"
       (record-event [:midi :pad1 :up])
       (note-off 5 1)
 
@@ -327,8 +340,10 @@
                     :data2-f 0,
                     :data2 0}])))
 
-  (describe "events for buttons b1-b4"
-    (it "should trigger :midi :b<n> :on events when button bn is enabled"
+  (describe
+    "events for buttons b1-b4"
+    (it
+      "should trigger :midi :b<n> :on events when button bn is enabled"
       (record-event [:midi :b1 :on])
       (control-change 1 1 127)
 
@@ -369,7 +384,8 @@
                     :data2-f 1,
                     :data2 127}]))
 
-    (it "should trigger :midi :b<n> :off events when button bn is disabled"
+    (it
+      "should trigger :midi :b<n> :off events when button bn is disabled"
       (record-event [:midi :b1 :off])
       (control-change 1 1 0)
 
@@ -410,8 +426,10 @@
                     :data2-f 0,
                     :data2 0}])))
 
-  (describe "events for buttons l1-b9"
-    (it "should trigger :midi :l<n> :on events when button bn is enabled"
+  (describe
+    "events for buttons l1-b9"
+    (it
+      "should trigger :midi :l<n> :on events when button bn is enabled"
       (record-event [:midi :l1 :on])
       (control-change 2 1 127)
 
@@ -452,7 +470,8 @@
                     :data2-f 1,
                     :data2 127}]))
 
-    (it "should trigger :midi :l<n> :off events when button bn is disabled"
+    (it
+      "should trigger :midi :l<n> :off events when button bn is disabled"
       (record-event [:midi :l1 :off])
       (control-change 2 1 0)
 
@@ -493,8 +512,10 @@
                     :data2-f 0,
                     :data2 0}])))
 
-  (describe "events for buttons r1-r9"
-    (it "that :midi :r<n> events are triggered when knob rn is turned"
+  (describe
+    "events for buttons r1-r9"
+    (it
+      "that :midi :r<n> events are triggered when knob rn is turned"
       (record-event [:midi :r1])
       (control-change 3 1 32)
 
@@ -541,8 +562,10 @@
                     :data2 127,
                     :value 127}])))
 
-  (describe "events for sliders s1-s9"
-    (it "should trigger :midi :s<n> events when slider sn is slided"
+  (describe
+    "events for sliders s1-s9"
+    (it
+      "should trigger :midi :s<n> events when slider sn is slided"
       (record-event [:midi :s1])
       (control-change 4 1 32)
 

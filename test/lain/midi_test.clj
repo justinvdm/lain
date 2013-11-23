@@ -1,4 +1,4 @@
-(ns overtone-roland-a300.midi-test
+(ns lain.midi-test
   (:require [speclj.core :refer :all]
             [overtone.sc.node :refer [ctl]]
             [overtone.libs.counters :refer [next-id
@@ -6,7 +6,7 @@
             [overtone.libs.event :refer [event
                                          remove-handler]]
             [overtone.music.pitch :refer [midi->hz]]
-            [overtone-roland-a300.midi :refer :all]))
+            [lain.midi :refer :all]))
 
 (def ctls (atom []))
 (def plays (atom []))

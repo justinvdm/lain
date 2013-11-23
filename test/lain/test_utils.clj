@@ -1,4 +1,4 @@
-(ns overtone-roland-a300.test-utils
+(ns lain.test-utils
   (:require [overtone.libs.event :refer [event]]))
 
 (defn fake-event

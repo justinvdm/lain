@@ -1,4 +1,4 @@
-(ns overtone-roland-a300.midi
+(ns lain.midi
   (:require [overtone.sc.node :refer [ctl]]
             [overtone.libs.counters :refer [next-id]]
             [overtone.libs.event :refer [on-event

@@ -1,10 +1,10 @@
-(ns overtone-roland-a300.events-test
+(ns lain.events-test
   (:require [speclj.core :refer :all]
             [overtone.libs.event :refer [event
                                          on-event
                                          remove-handler]]
-            [overtone-roland-a300.events :refer :all]
-            [overtone-roland-a300.test-utils :refer :all]))
+            [lain.events :refer :all]
+            [lain.test-utils :refer :all]))
 
 (def records (atom []))
 

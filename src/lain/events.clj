@@ -82,11 +82,11 @@
   (handler e)))
 
 (defn handle-a300-events []
-  (on-event [:midi :control-change] #(handle-event %) ::a300-control-change)
-  (on-event [:midi :note-on] #(handle-event %) ::a300-note-on)
-  (on-event [:midi :note-off] #(handle-event %) ::a300-note-off))
+  (on-event [:midi :control-change] #(handle-event %) [:a300 :control-change])
+  (on-event [:midi :note-on] #(handle-event %) [:a300 :note-on])
+  (on-event [:midi :note-off] #(handle-event %) [:a300 :note-off]))
 
 (defn remove-a300-event-handlers []
-  (remove-handler ::a300-control-change)
-  (remove-handler ::a300-note-on)
-  (remove-handler ::a300-note-off))
+  (remove-handler [:a300 :control-change])
+  (remove-handler [:a300 :note-on])
+  (remove-handler [:a300 :note-off]))

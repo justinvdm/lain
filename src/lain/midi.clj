@@ -59,14 +59,14 @@
             (apply ctl (concat [node-id] (bend-note @bend-offset note)))))
         bend-event-key))
 
-     (let [player-id (next-id :play-midi-keys)
-           player {:player-id player-id
-                   :down-event-key down-event-key
-                   :up-event-key up-event-key
-                   :bend-event-key (if bend-event bend-event-key nil)
-                   :notes notes}]
-       (swap! midi-key-players assoc player-id player)
-       player-id)))
+    (let [player-id (next-id :play-midi-keys)
+          player {:player-id player-id
+                  :down-event-key down-event-key
+                  :up-event-key up-event-key
+                  :bend-event-key (if bend-event bend-event-key nil)
+                  :notes notes}]
+      (swap! midi-key-players assoc player-id player)
+      player-id)))
 
 (defn remove-player [player-id]
   (let [{down-event-key :down-event-key

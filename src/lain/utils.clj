@@ -38,4 +38,13 @@
     (let
       [wave-val (wave :note note)
        env-val (env-gen env gate :action FREE)]
-      (* velocity-f env-val wave-val))))
+      (* velocity-f env-val wave-val)))) 
+
+(defmacro deflcgen
+  "Define a lightweight cgen"
+  [cgen-name rate params & body]
+  (let
+    [params (partition 2 params)
+     params (for [[p-name, p-val] params] [p-name {:default p-val}])
+     params (vec (flatten params))]
+    `(defcgen ~cgen-name "" ~params (~rate ~@body))))

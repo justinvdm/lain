@@ -2,7 +2,8 @@
   (:require [overtone.studio.inst :refer [inst]]
             [overtone.sc.synth :refer [synth-form]]
             [overtone.sc.ugens :refer [FREE
-                                       env-gen]]))
+                                       env-gen]]
+            [overtone.sc.defcgen :refer [defcgen]]))
 
 (defmacro temp-inst
   "Workaround to declare an inst with params without using definst

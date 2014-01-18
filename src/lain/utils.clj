@@ -1,10 +1,12 @@
 (ns lain.utils
-  (:require [overtone.studio.inst :refer [inst]]
+  (:require [clojure.string :refer [join]]
+            [overtone.studio.inst :refer [inst]]
             [overtone.sc.synth :refer [synth-form]]
             [overtone.sc.ugens :refer [FREE
                                        env-gen]]
             [overtone.sc.defcgen :refer [defcgen]]
-            [overtone.sc.sample :refer [load-sample]]))
+            [overtone.sc.sample :refer [load-sample]]
+            [lain config]))
 
 (defmacro temp-inst
   "Workaround to declare an inst with params without using definst
@@ -52,4 +54,13 @@
     `(defcgen ~cgen-name "" ~params (~rate ~@body))))
 
 (defn get-sample [path]
-  (load-sample (format "~/self/lain/samples/%s" path)))
+  (load-sample (join [lain.config/base-path "samples/" path])))
+
+(defn control-value
+  [wave-cgen
+   env
+   & {:keys [down-event
+             up-event]
+      :or {down-event [:midi :key :down]
+           up-event [:midi :key :up]}}]
+

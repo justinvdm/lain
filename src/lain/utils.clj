@@ -3,7 +3,8 @@
             [overtone.sc.synth :refer [synth-form]]
             [overtone.sc.ugens :refer [FREE
                                        env-gen]]
-            [overtone.sc.defcgen :refer [defcgen]]))
+            [overtone.sc.defcgen :refer [defcgen]]
+            [overtone.sc.sample :refer [load-sample]]))
 
 (defmacro temp-inst
   "Workaround to declare an inst with params without using definst
@@ -49,3 +50,6 @@
      params (for [[p-name, p-val] params] [p-name {:default p-val}])
      params (vec (flatten params))]
     `(defcgen ~cgen-name "" ~params (~rate ~@body))))
+
+(defn get-sample [path]
+  (load-sample (format "~/self/lain/samples/%s" path)))

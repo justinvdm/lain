@@ -22,9 +22,10 @@
      freq (+ freq offset)]
     (square freq)))
 
+(def warpy (key-inst wave (adsr 0.0001 0.01 1 2.5)))
+
 (comment
   (handle-a300-events)
-  (def !warp (warp))
-  (def -i-ki (key-inst wave (adsr 0.0001 0.01 1 2.5)))
-  (def -k (midi-key-player -i-ki))
+  (warp)
+  (midi-key-player warpy)
 ())

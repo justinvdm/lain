@@ -55,12 +55,3 @@
 
 (defn get-sample [path]
   (load-sample (join [lain.config/base-path "samples/" path])))
-
-(defn control-value
-  [wave-cgen
-   env
-   & {:keys [down-event
-             up-event]
-      :or {down-event [:midi :key :down]
-           up-event [:midi :key :up]}}]
-

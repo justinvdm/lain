@@ -6,14 +6,13 @@
             [a300.control :refer [value-controller
                                   remove-all-controllers]]
             [lain.utils :refer [key-inst
-                                deflcgen
-                                get-sample]]))
+                                deflcgen]]))
 
 (def !window-size-bus (control-bus))
 (def !window-rand-ratio-bus (control-bus))
 (def !overlaps-bus (control-bus))
 
-(def !glock-buf (get-sample "glock1/c1.wav"))
+(def !glock-buf (load-sample "samples/glock1/c1.wav"))
 (def !base-freq (midi->hz 60))  ; c1
 
 (deflcgen glock-wave :ar

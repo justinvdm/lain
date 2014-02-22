@@ -1,9 +1,11 @@
 (ns lain.utils
   (:require [clojure.string :refer [join]]
+            [overtone.libs.counters :refer [next-id]]
             [overtone.studio.inst :refer [inst]]
             [overtone.sc.synth :refer [synth-form]]
             [overtone.sc.ugens :refer [FREE
-                                       env-gen]]
+                                       env-gen
+                                       play-buf]]
             [overtone.sc.defcgen :refer [defcgen]]
             [overtone.sc.sample :refer [load-sample]]
             [lain config]))
@@ -18,9 +20,7 @@
       inst-name (with-meta inst-name (merge (meta inst-name) {:type ::instrument}))]
     `(inst ~inst-name ~params ~ugen-form)))
 
-(defn key-inst
-  [wave
-   env]
+(defn key-inst [wave env]
   (temp-inst
     _
     [freq 440
@@ -31,9 +31,7 @@
        env-val (env-gen env gate :action FREE)]
       (* velocity-f env-val wave-val))))
 
-(defn key-note-inst
-  [wave
-   env]
+(defn key-note-inst [wave env]
   (temp-inst
     _
     [note 60
@@ -52,6 +50,3 @@
      params (for [[p-name, p-val] params] [p-name {:default p-val}])
      params (vec (flatten params))]
     `(defcgen ~cgen-name "" ~params (~rate ~@body))))
-
-(defn get-sample [path]
-  (load-sample (join [lain.config/base-path "samples/" path])))

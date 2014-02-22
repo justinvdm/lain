@@ -3,20 +3,21 @@
             [overtone.libs.counters :refer [next-id]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
-            [overtone.music.pitch :refer [midi->hz]]))
+            [overtone.music.pitch :refer [midi->hz]]
+            [overtone.sc.envelope :refer [perc]]))
 
-(defonce midi-key-players (atom {}))
+(defonce players (atom {}))
 
 (defn bend-note [note offset]
   (let [bent-note (+ note offset)]
     [:note (int bent-note)
      :freq (midi->hz bent-note)]))
 
-(defn midi-key-player
-  [player-fn & {:keys [down-event
-                       up-event]
-                 :or {down-event [:midi :key :down]
-                      up-event [:midi :key :up]}}]
+
+(defn midi-key-player [player-fn & {:keys [down-event
+                                           up-event]
+                                    :or {down-event [:midi :key :down]
+                                         up-event [:midi :key :up]}}]
 
   (let [down-event-key (concat [:midi-key-player] down-event)
         up-event-key (concat [:midi-key-player] up-event)
@@ -47,26 +48,63 @@
                   :up-event-key up-event-key
                   :notes notes
                   :bend-offset bend-offset}]
-      (swap! midi-key-players assoc player-id player)
+      (swap! players assoc player-id player)
       player-id)))
 
-(defn remove-key-player [player-id]
-  (let [{down-event-key :down-event-key
-         up-event-key :up-event-key} (get @midi-key-players player-id)]
-    (remove-event-handler down-event-key)
-    (remove-event-handler up-event-key)
-    (swap! midi-key-players dissoc player-id)))
-
-(defn remove-all-key-players []
-  (doseq
-    [[player-id player] @midi-key-players] 
-    (remove-key-player player-id)))
 
 (defn bend-midi-keys
   [player-id
    bend-offset]
-  (let [player (get @midi-key-players player-id)]
+  (let [player (get @players player-id)]
     (reset! (:bend-offset player) bend-offset)
     (doseq
       [[note node-id] @(:notes player)] 
       (apply ctl (concat [node-id] (bend-note bend-offset note))))))
+
+
+(defn remove-key-player [player-id]
+  (let [{down-event-key :down-event-key
+         up-event-key :up-event-key} (get @players player-id)]
+    (remove-event-handler down-event-key)
+    (remove-event-handler up-event-key)
+    (swap! players dissoc player-id)))
+
+
+(defn remove-all-key-players []
+  (doseq
+    [[player-id player] @players] 
+    (remove-key-player player-id)))
+
+
+(defn buf-player [player-fn bufs & {:keys [event-type]
+                                    :or {event-type [:midi :pad :down]}}]
+
+  (let [event-key (concat [:buf-player] event-type)]
+
+    (on-event
+      event-type
+      (fn
+        [{note :note
+          velocity-f :velocity-f}]
+        (player-fn
+          :buf (get bufs note)
+          :velocity-f velocity-f))
+      event-key)
+
+    (let [player-id (next-id :buf-player)
+          player {:player-id player-id
+                  :event-key event-key}]
+      (swap! players assoc player-id player)
+      player-id)))
+
+
+(defn remove-buf-player [player-id]
+  (let [{event-key :event-key} (get @players player-id)]
+    (remove-event-handler event-key)
+    (swap! players dissoc player-id)))
+
+
+(defn remove-all-buf-players []
+  (doseq
+    [[player-id player] @players] 
+    (remove-buf-player player-id)))

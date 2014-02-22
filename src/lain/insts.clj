@@ -2,6 +2,7 @@
   (:require [overtone.sc.ugens :refer [FREE
                                        env-gen
                                        play-buf]]
+            [overtone.sc.cgens.buf-io :refer [scaled-play-buf]]
             [lain.utils :refer [anon-inst]]))
 
 (defn key-inst [wave env]
@@ -24,3 +25,11 @@
        env-val (env-gen env gate :action FREE)]
       (* velocity-f env-val wave-val)))) 
 
+(defn buf-inst [env]
+  (anon-inst
+    [buf 1
+     velocity-f 1]
+    (let
+      [wave-val (scaled-play-buf 2 buf)
+       env-val (env-gen env)]
+      (* velocity-f env-val wave-val))))

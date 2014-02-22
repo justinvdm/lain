@@ -4,8 +4,9 @@
             [lain.a300.play :refer [buf-player]]
             [lain.insts :refer [buf-inst]]))
 
-(def !bufs {0 (load-sample "samples/drums1/kick.wav")
-            1 (load-sample "samples/drums1/snare.wav")})
+(def !bufs {1 (load-sample "samples/drums1/kick.wav")
+            4 (load-sample "samples/drums1/snare.wav")
+            8 (load-sample "samples/drums1/hat.wav")})
 
 (defn start []
   (handle-a300-events)

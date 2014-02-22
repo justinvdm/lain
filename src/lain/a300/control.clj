@@ -7,18 +7,13 @@
 
 (defonce controllers (atom {}))
 
-(defn value-controller
-  [bus
-   event-type
-   & {:keys [extent
-             modifier]
-      :or {extent [0 1]
-           modifier identity}}]
-  (let
-    [interpolator (lin-interpolator [0 1] extent)
-     event-key (concat [:controller] event-type)
-     controller-id (next-id :controller)
-     controller-data {:event-key event-key}]
+(defn value-controller [bus event-type & {:keys [extent modifier]
+                                          :or {extent [0 1]
+                                               modifier identity}}]
+  (let [interpolator (lin-interpolator [0 1] extent)
+        event-key (concat [:controller] event-type)
+        controller-id (next-id :controller)
+        controller-data {:event-key event-key}]
 
     (swap! controllers assoc controller-id controller-data)
 

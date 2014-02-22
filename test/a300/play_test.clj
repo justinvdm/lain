@@ -171,20 +171,66 @@
 
   (describe "buf-player"
 
-    (describe "when event is emitted"
+    (describe "when the down event is emitted"
 
-      (it "should play the function"
-        (buf-player play {3 "buf-3"})
+      (it "should only play the function once until the up event is emitted"
+        (buf-player play {2 "buf-2"
+                          3 "buf-3"})
+
+        (event
+          [:midi :pad :down]
+          {:note 2
+           :velocity-f 0.6})
+        (Thread/sleep 20)
 
         (event
           [:midi :pad :down]
           {:note 3
            :velocity-f 0.5})
-
         (Thread/sleep 20)
 
-        (should= @plays [[:buf "buf-3"
-                          :velocity-f 0.5]]))))
+        (event
+          [:midi :pad :down]
+          {:note 2
+           :velocity-f 0.3})
+        (Thread/sleep 20)
+
+        (event
+          [:midi :pad :down]
+          {:note 3
+           :velocity-f 0.2})
+        (Thread/sleep 20)
+
+        (event
+          [:midi :pad :up]
+          {:note 2})
+        (Thread/sleep 20)
+
+        (event
+          [:midi :pad :up]
+          {:note 3})
+        (Thread/sleep 20)
+
+        (event
+          [:midi :pad :down]
+          {:note 2
+           :velocity-f 0.8})
+        (Thread/sleep 20)
+
+        (event
+          [:midi :pad :down]
+          {:note 3
+           :velocity-f 0.9})
+        (Thread/sleep 20)
+
+        (should= @plays [[:buf "buf-2"
+                          :velocity-f 0.6]
+                         [:buf "buf-3"
+                          :velocity-f 0.5]
+                         [:buf "buf-2"
+                          :velocity-f 0.8]
+                         [:buf "buf-3"
+                          :velocity-f 0.9]]))))
 
   (describe "remove-buf-player"
 
@@ -194,9 +240,13 @@
          (it))
        (remove-all-buf-players)])
 
-    (it "should stop listening to events associated with the player"
+    (it "should stop listening to down events associated with the player"
       (remove-buf-player (buf-player play {}))
       (should-contain [[:buf-player :midi :pad :down]] @removed-handlers))
+
+    (it "should stop listening to up events associated with the player"
+      (remove-buf-player (buf-player play {}))
+      (should-contain [[:buf-player :midi :pad :up]] @removed-handlers))
 
   (describe "remove-all-buf-players"
 
@@ -206,9 +256,16 @@
        (with-redefs [remove-event-handler #(swap! removed-handlers conj %&)]
          (it))])
 
-    (it "should stop listening to events for all players"
-      (buf-player play {} :event-type [:foo])
-      (buf-player play {} :event-type [:bar])
+    (it "should stop listening to down events for all players"
+      (buf-player play {} :down-event [:foo :down])
+      (buf-player play {} :down-event [:bar :down])
       (remove-all-buf-players)
-      (should-contain [[:buf-player :foo]] @removed-handlers)
-      (should-contain [[:buf-player :bar]] @removed-handlers)))))
+      (should-contain [[:buf-player :foo :down]] @removed-handlers)
+      (should-contain [[:buf-player :bar :down]] @removed-handlers))
+
+    (it "should stop listening to up events for all players"
+      (buf-player play {} :up-event [:foo :up])
+      (buf-player play {} :up-event [:bar :up])
+      (remove-all-buf-players)
+      (should-contain [[:buf-player :foo :up]] @removed-handlers)
+      (should-contain [[:buf-player :bar :up]] @removed-handlers)))))

@@ -76,35 +76,51 @@
     (remove-key-player player-id)))
 
 
-(defn buf-player [player-fn bufs & {:keys [event-type]
-                                    :or {event-type [:midi :pad :down]}}]
+(defn buf-player [player-fn bufs & {:keys [down-event
+                                           up-event]
+                                    :or {down-event [:midi :pad :down]
+                                         up-event [:midi :pad :up]}}]
 
-  (let [event-key (concat [:buf-player] event-type)]
+  (let [down-event-key (concat [:buf-player] down-event)
+        up-event-key (concat [:buf-player] up-event)
+        notes (atom {})]
 
     (on-event
-      event-type
-      (fn
-        [{note :note
-          velocity-f :velocity-f}]
-        (player-fn
-          :buf (get bufs note)
-          :velocity-f velocity-f))
-      event-key)
+      down-event
+      (fn [{note :note
+            velocity-f :velocity-f}]
+        (when-not (contains? @notes note)
+          (when-let [buf (get bufs note)]
+            (swap! notes assoc note velocity-f)
+            (player-fn
+              :buf buf
+              :velocity-f velocity-f))))
+      down-event-key)
+
+    (on-event
+      up-event
+      (fn [{note :note}]
+        (swap! notes dissoc note))
+      up-event-key)
 
     (let [player-id (next-id :buf-player)
           player {:player-id player-id
-                  :event-key event-key}]
+                  :down-event-key down-event-key
+                  :up-event-key up-event-key
+                  :notes notes}]
       (swap! players assoc player-id player)
       player-id)))
 
 
 (defn remove-buf-player [player-id]
-  (let [{event-key :event-key} (get @players player-id)]
-    (remove-event-handler event-key)
+  (let [{down-event-key :down-event-key
+         up-event-key :up-event-key} (get @players player-id)]
+    (remove-event-handler down-event-key)
+    (remove-event-handler up-event-key)
     (swap! players dissoc player-id)))
 
 
 (defn remove-all-buf-players []
   (doseq
     [[player-id player] @players] 
-    (remove-buf-player player-id)))
+    (remove-key-player player-id)))

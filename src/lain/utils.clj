@@ -3,12 +3,37 @@
             [overtone.libs.counters :refer [next-id]]
             [overtone.studio.inst :refer [inst]]
             [overtone.sc.synth :refer [synth-form]]
-            [overtone.sc.ugens :refer [FREE
-                                       env-gen
-                                       play-buf]]
             [overtone.sc.defcgen :refer [defcgen]]
-            [overtone.sc.sample :refer [load-sample]]
-            [lain config]))
+            [overtone.sc.sample :refer [load-sample]]))
+
+(defn lin-interpolator
+  [[x1 x2]
+   [y1 y2]]
+  (let [xd (- x2 x1)
+        yd (- y2 y1)
+        m (/ yd xd)]
+    (fn [x] (+ (* m (- x x1)) y1))))
+
+(defn format-modes [modes]
+  (into
+    {}
+    (for
+      [[mode-key mode] modes] 
+      (if-not (map? mode)
+        [mode-key {:start mode :end (fn [& _])}]
+        [mode-key mode]))))
+
+(defn mode-switcher [modes]
+  (let
+    [modes (format-modes modes)
+     mode-key (atom nil)]
+    (fn [new-mode-key]
+      (when-not (= @mode-key new-mode-key)
+        (when-let [old-mode-key @mode-key]
+          ((:end (get modes old-mode-key))))
+        (reset! mode-key new-mode-key)
+        (when new-mode-key
+          ((:start (get modes new-mode-key))))))))
 
 (defmacro anon-inst
   "Workaround to declare an anonymous inst with params
@@ -20,26 +45,6 @@
      [inst-name params ugen-form] (synth-form inst-name inst-form)
       inst-name (with-meta inst-name (merge (meta inst-name) {:type ::instrument}))]
     `(inst ~inst-name ~params ~ugen-form)))
-
-(defn key-inst [wave env]
-  (anon-inst
-    [freq 440
-     velocity-f 1
-     gate 1]
-    (let
-      [wave-val (wave :freq freq)
-       env-val (env-gen env gate :action FREE)]
-      (* velocity-f env-val wave-val))))
-
-(defn key-note-inst [wave env]
-  (anon-inst
-    [note 60
-     velocity-f 1
-     gate 1]
-    (let
-      [wave-val (wave :note note)
-       env-val (env-gen env gate :action FREE)]
-      (* velocity-f env-val wave-val)))) 
 
 (defmacro deflcgen
   "Define a lightweight cgen"

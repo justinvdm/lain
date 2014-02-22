@@ -1,12 +1,12 @@
 (ns lain.experiments.pitched-sample
   (:require [overtone.live :refer :all]
-            [a300.events :refer [handle-a300-events]]
-            [a300.play :refer [midi-key-player
-                               remove-all-key-players]]
-            [a300.control :refer [value-controller
-                                  remove-all-controllers]]
-            [lain.utils :refer [key-inst
-                                deflcgen]]))
+            [lain.a300.events :refer [handle-a300-events]]
+            [lain.a300.play :refer [midi-key-player
+                                    remove-all-key-players]]
+            [lain.a300.control :refer [value-controller
+                                       remove-all-controllers]]
+            [lain.insts :refer [key-inst]]
+            [lain.utils :refer [deflcgen]]))
 
 (def !window-size-bus (control-bus))
 (def !window-rand-ratio-bus (control-bus))

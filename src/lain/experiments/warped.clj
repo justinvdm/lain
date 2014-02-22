@@ -1,10 +1,10 @@
 (ns lain.experiments.warped
   (:require [overtone.live :refer :all]
-            [a300.events :refer [handle-a300-events]]
-            [a300.play :refer [midi-key-player
-                               remove-key-player]]
-            [lain.utils :refer [key-inst
-                                deflcgen]]))
+            [lain.a300.events :refer [handle-a300-events]]
+            [lain.a300.play :refer [midi-key-player
+                                    remove-key-player]]
+            [lain.insts :refer [key-inst]]
+            [lain.utils :refer [deflcgen]]))
 
 (def !warp-bus (audio-bus))
 

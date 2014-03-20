@@ -7,4 +7,5 @@
                  [a300 "0.0.0"]]
   :profiles {:dev {:dependencies [[speclj "2.7.5"]]}}
   :plugins [[speclj "2.7.5"]]
-  :test-paths ["test"])
+  :test-paths ["test"]
+  :speclj-eval-in :leiningen)

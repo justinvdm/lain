@@ -1,7 +1,7 @@
 (ns lain.a300.events-test
   (:require [speclj.core :refer :all]
-            [overtone.libs.event :refer [event
-                                         on-event
+            [overtone.libs.event :refer [sync-event
+                                         on-sync-event
                                          remove-event-handler]]
             [a300.events :refer :all]))
 
@@ -11,7 +11,7 @@
    note
    velocity]
   (let [velocity-f (/ velocity 127)]
-    (event
+    (sync-event
       [:midi event-type]
       {:status nil
        :note note,
@@ -22,8 +22,7 @@
        :command event-type
        :velocity-f velocity-f
        :data2-f velocity-f
-       :data2 velocity})
-    (Thread/sleep 50)))
+       :data2 velocity})))
 
 (defn control-change [channel note velocity]
   (fake-event :control-change channel note velocity))
@@ -38,7 +37,7 @@
 
 (defn record-event
   [event-type]
-  (on-event event-type #(swap! records conj %) ::test))
+  (on-sync-event event-type #(swap! records conj %) ::test))
 
 (defn clear-records []
   (reset! records []))

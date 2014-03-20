@@ -3,7 +3,7 @@
             [overtone.sc.node :refer [ctl]]
             [overtone.libs.counters :refer [next-id
                                             reset-counter!]]
-            [overtone.libs.event :refer [event
+            [overtone.libs.event :refer [sync-event
                                          remove-event-handler]]
             [overtone.music.pitch :refer [midi->hz]]
             [lain.a300.play :refer :all]))
@@ -35,17 +35,15 @@
       (it "should play the player function"
         (midi-key-player play)
 
-        (event
+        (sync-event
           [:midi :key :down]
           {:note 60
            :velocity-f 0.5})
 
-        (event
+        (sync-event
           [:midi :key :down]
           {:note 61
            :velocity-f 0.5})
-
-        (Thread/sleep 20)
 
         (should= @plays [[:note 60
                           :freq (midi->hz 60)
@@ -59,23 +57,20 @@
       (it "should zeroize the gate of the player function for that note"
         (midi-key-player play)
 
-        (event
+        (sync-event
           [:midi :key :down]
           {:note 60
            :velocity-f 0.5})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :key :down]
           {:note 61
            :velocity-f 0.5})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :key :up]
           {:note 61
            :velocity-f 0.5})
-        (Thread/sleep 20)
 
         (should= @ctls [[1 :gate 0]])))
 
@@ -84,20 +79,17 @@
     (it
       "should bend the key player's active notes"
       (let [player-id (midi-key-player play)]
-        (event
+        (sync-event
           [:midi :key :down]
           {:note 60
            :velocity-f 0.5})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :key :down]
           {:note 61
            :velocity-f 0.5})
-        (Thread/sleep 20)
 
         (bend-midi-keys player-id 2)
-        (Thread/sleep 20)
 
         (should= @ctls [[1
                          :note 63
@@ -109,19 +101,16 @@
     (it "should bend new notes played by the key player"
       (let [player-id (midi-key-player play)]
         (bend-midi-keys player-id 2)
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :key :down]
           {:note 60
            :velocity-f 0.5})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :key :down]
           {:note 61
            :velocity-f 0.5})
-        (Thread/sleep 20)
 
         (should= @plays [[:note 62
                           :freq 293.6647679174076
@@ -177,51 +166,43 @@
         (buf-player play {2 "buf-2"
                           3 "buf-3"})
 
-        (event
+        (sync-event
           [:midi :pad :down]
           {:note 2
            :velocity-f 0.6})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :pad :down]
           {:note 3
            :velocity-f 0.5})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :pad :down]
           {:note 2
            :velocity-f 0.3})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :pad :down]
           {:note 3
            :velocity-f 0.2})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :pad :up]
           {:note 2})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :pad :up]
           {:note 3})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :pad :down]
           {:note 2
            :velocity-f 0.8})
-        (Thread/sleep 20)
 
-        (event
+        (sync-event
           [:midi :pad :down]
           {:note 3
            :velocity-f 0.9})
-        (Thread/sleep 20)
 
         (should= @plays [[:buf "buf-2"
                           :velocity-f 0.6]

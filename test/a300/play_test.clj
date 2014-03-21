@@ -64,7 +64,24 @@
           {:note 60
            :velocity-f 0.5})
 
-        (should= 1 (count @plays))))
+        (should= 1 (count @plays)))
+
+      (it "should not play the player function if the key belongs to another device"
+        (midi-key-player play :device "device-foo")
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :device {:name "device-foo"}})
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :device {:name "device-bar"}})
+
+        (should= 1 (count @plays)))))
 
     (describe "when a key is released"
 
@@ -86,7 +103,30 @@
           {:note 61
            :velocity-f 0.5})
 
-        (should= @ctls [[1 :gate 0]])))
+        (should= @ctls [[1 :gate 0]]))
+
+      (it "should ignore the key if it belongs to another device"
+        (midi-key-player play :device "device-foo")
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :device {:name "device-foo"}})
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :device {:name "device-foo"}})
+
+        (sync-event
+          [:midi :key :up]
+          {:note 60
+           :velocity-f 0.5
+           :device {:name "device-bar"}})
+
+        (should= 1 (count @ctls))))
 
   (describe "bend-midi-keys"
 
@@ -169,7 +209,7 @@
       (midi-key-player play :down-event [:bar :down])
       (remove-all-key-players)
       (should-contain [[:midi-key-player :foo :down]] @removed-handlers)
-      (should-contain [[:midi-key-player :bar :down]] @removed-handlers))))
+      (should-contain [[:midi-key-player :bar :down]] @removed-handlers)))
 
 
   (describe "buf-player"

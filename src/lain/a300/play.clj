@@ -15,9 +15,11 @@
 
 
 (defn midi-key-player [player-fn & {:keys [down-event
-                                           up-event]
+                                           up-event
+                                           device-name]
                                     :or {down-event [:midi :key :down]
-                                         up-event [:midi :key :up]}}]
+                                         up-event [:midi :key :up]
+                                         device-name nil}}]
 
   (let [down-event-key (concat [:midi-key-player] down-event)
         up-event-key (concat [:midi-key-player] up-event)
@@ -27,20 +29,26 @@
     (on-event
       down-event
       (fn [{note :note
-            velocity-f :velocity-f}]
-        (when-not (contains? @notes note)
-          (let [play-args (concat (bend-note note @bend-offset)
-                                  [:velocity-f velocity-f])
-                node-id (apply player-fn play-args)]
-            (swap! notes assoc note node-id))))
-        down-event-key)
+            velocity-f :velocity-f
+            {event-device-name :name} :device}]
+        (when (or (nil? device-name)
+                  (= device-name event-device-name))
+          (when-not (contains? @notes note)
+            (let [play-args (concat (bend-note note @bend-offset)
+                                    [:velocity-f velocity-f])
+                  node-id (apply player-fn play-args)]
+              (swap! notes assoc note node-id)))))
+      down-event-key)
 
     (on-event
       up-event
-      (fn [{note :note}]
-        (when-let [n (get @notes note)]
-          (ctl n :gate 0)
-          (swap! notes dissoc note)))
+      (fn [{note :note
+            {event-device-name :name} :device}]
+        (when (or (nil? device-name)
+                  (= device-name event-device-name))
+          (when-let [n (get @notes note)]
+            (ctl n :gate 0)
+            (swap! notes dissoc note))))
       up-event-key)
 
     (let [player-id (next-id :midi-key-player)

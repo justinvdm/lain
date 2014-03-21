@@ -28,11 +28,12 @@
       down-event
       (fn [{note :note
             velocity-f :velocity-f}]
-        (let [play-args (concat (bend-note note @bend-offset)
-                                [:velocity-f velocity-f])
-              node-id (apply player-fn play-args)]
-          (swap! notes assoc note node-id)))
-      down-event-key)
+        (when-not (contains? @notes note)
+          (let [play-args (concat (bend-note note @bend-offset)
+                                  [:velocity-f velocity-f])
+                node-id (apply player-fn play-args)]
+            (swap! notes assoc note node-id))))
+        down-event-key)
 
     (on-event
       up-event

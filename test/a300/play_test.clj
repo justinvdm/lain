@@ -31,8 +31,7 @@
   (describe "midi-key-player"
 
     (describe "when a key is pressed"
-
-      (it "should play the player function"
+      (it "should play the player function if the key is not already pressed"
         (midi-key-player play)
 
         (sync-event
@@ -50,7 +49,22 @@
                           :velocity-f 0.5]
                          [:note 61
                           :freq (midi->hz 61)
-                          :velocity-f 0.5]])))
+                          :velocity-f 0.5]]))
+
+      (it "should not play the player function if the key is already pressed"
+        (midi-key-player play)
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5})
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5})
+
+        (should= 1 (count @plays))))
 
     (describe "when a key is released"
 

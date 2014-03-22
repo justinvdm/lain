@@ -47,12 +47,12 @@
       up-event
       (fn [e]
         (let [{note :note
-              {event-device-name :name} :device} e]
+               {event-device-name :name} :device} e]
           (when (and (or (nil? device-name)
                          (= device-name event-device-name))
                      (contains? @notes note))
-              (up e (get @notes note))
-              (swap! notes dissoc note))))
+            (up e (get @notes note))
+            (swap! notes dissoc note))))
       up-event-key)
 
     (let [player-id (next-id :midi-player)
@@ -81,7 +81,7 @@
   (doseq
     [[player-id player] @midi-players] 
     (remove-midi-player player-id)))
-  
+
 
 (defn midi-key-player [player-fn & {:keys [down-event
                                            up-event
@@ -123,15 +123,15 @@
       (apply ctl (concat [node-id] (bend-note bend-offset note))))))
 
 
-(defn buf-player [player-fn bufs & {:keys [down-event
-                                           up-event
-                                           device-name]
-                                    :or {down-event [:midi :pad :down]
-                                         up-event [:midi :pad :up]
-                                         device-name nil}}]
+(defn midi-buf-player [player-fn bufs & {:keys [down-event
+                                                up-event
+                                                device-name]
+                                         :or {down-event [:midi :pad :down]
+                                              up-event [:midi :pad :up]
+                                              device-name nil}}]
 
   (midi-player
-    :buf-player
+    :midi-buf-player
     :device-name device-name
     :down-event down-event
     :up-event up-event

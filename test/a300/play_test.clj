@@ -276,10 +276,10 @@
                                            :velocity-f 0.5]
                                     :times 1}))))
 
-  (describe "buf-player"
+  (describe "midi-buf-player"
     (describe "when the down event is emitted"
       (it "should play the player function"
-        (buf-player (stub :play) {2 "buf-2"
+        (midi-buf-player (stub :play) {2 "buf-2"
                                   3 "buf-3"})
 
         (sync-event

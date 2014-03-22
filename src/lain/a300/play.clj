@@ -44,7 +44,7 @@
               event-channel :channel
               {event-device-name :name} :device}]
           (and (or (nil? channel)
-                   (= event-channel channel))
+                   (= channel event-channel))
                (or (nil? device-name)
                    (= device-name event-device-name))))]
 

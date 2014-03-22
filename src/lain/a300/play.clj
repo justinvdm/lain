@@ -20,25 +20,39 @@
                                         up
                                         setup
                                         teardown
-                                        device-name]
+                                        device-name
+                                        channel]
                                  :or {down-event [:midi :key :down]
                                       up-event [:midi :key :up]
                                       down (fn [e] ())
                                       up (fn [e v] ())
                                       setup identity
                                       teardown (fn [p] ())
-                                      device-name nil}}]
-  (let [down-event-key (concat [player-key] down-event)
-        up-event-key (concat [player-key] up-event)
-        notes (atom {})]
+                                      device-name nil
+                                      channel nil}}]
+  (let [down-event-key
+        (concat [player-key] down-event)
+
+        up-event-key
+        (concat [player-key] up-event)
+
+        notes
+        (atom {})
+
+        match
+        (fn [{note :note
+              event-channel :channel
+              {event-device-name :name} :device}]
+          (and (or (nil? channel)
+                   (= event-channel channel))
+               (or (nil? device-name)
+                   (= device-name event-device-name))))]
 
     (on-event
       down-event
       (fn [e]
-        (let [{note :note
-               {event-device-name :name} :device} e]
-          (when (and (or (nil? device-name)
-                         (= device-name event-device-name))
+        (let [{note :note} e]
+          (when (and (match e)
                      (not (contains? @notes note)))
             (swap! notes assoc note (down e)))))
       down-event-key)
@@ -46,10 +60,8 @@
     (on-event
       up-event
       (fn [e]
-        (let [{note :note
-               {event-device-name :name} :device} e]
-          (when (and (or (nil? device-name)
-                         (= device-name event-device-name))
+        (let [{note :note} e]
+          (when (and (match e)
                      (contains? @notes note))
             (up e (get @notes note))
             (swap! notes dissoc note))))

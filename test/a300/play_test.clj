@@ -74,6 +74,25 @@
            :velocity-f 0.5
            :device {:name "device-bar"}})
 
+        (should-have-invoked :down {:times 1}))
+
+      (it "should not handle the event if the key belongs to another channel"
+        (midi-player :test-player
+                     :channel 1
+                     :down (stub :down))
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :channel 1})
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :channel 2})
+
         (should-have-invoked :down {:times 1})))
 
     (describe "when a key is released"
@@ -101,53 +120,91 @@
         (should-have-invoked :up {:with [{:note 61
                                           :velocity-f 0.5}
                                          true]
-                                  :times 1})))
+                                  :times 1}))
 
-    (it "should ignore the event if no corresponding down event has happened"
-      (midi-player :test-player :up (stub :up))
+      (it "should ignore the event if no corresponding down event has happened"
+        (midi-player :test-player :up (stub :up))
 
-      (sync-event
-        [:midi :key :down]
-        {:note 60
-         :velocity-f 0.5})
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5})
 
-      (sync-event
-        [:midi :key :down]
-        {:note 60
-         :velocity-f 0.5})
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5})
 
-      (sync-event
-        [:midi :key :up]
-        {:note 60
-         :velocity-f 0.5})
+        (sync-event
+          [:midi :key :up]
+          {:note 60
+           :velocity-f 0.5})
 
-      (should-have-invoked :up {:times 1}))
+        (should-have-invoked :up {:times 1}))
 
-(it "should ignore the event if it belongs to another device"
-  (midi-player
-    :test-player
-    :device "device-foo"
-    :up (stub :up))
+      (it "should ignore the event if it belongs to another device"
+        (midi-player
+          :test-player
+          :device "device-foo"
+          :up (stub :up))
 
-  (sync-event
-    [:midi :key :down]
-    {:note 60
-     :velocity-f 0.5
-     :device {:name "device-foo"}})
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :device {:name "device-foo"}})
 
-  (sync-event
-    [:midi :key :down]
-    {:note 60
-     :velocity-f 0.5
-     :device {:name "device-foo"}})
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :device {:name "device-foo"}})
 
-  (sync-event
-    [:midi :key :up]
-    {:note 60
-     :velocity-f 0.5
-     :device {:name "device-bar"}})
+        (sync-event
+          [:midi :key :up]
+          {:note 60
+           :velocity-f 0.5
+           :device {:name "device-foo"}})
 
-  (should-have-invoked :up {:times 1})))
+        (sync-event
+          [:midi :key :up]
+          {:note 60
+           :velocity-f 0.5
+           :device {:name "device-bar"}})
+
+        (should-have-invoked :up {:times 1}))
+
+      (it "should ignore the event if it belongs to another channel"
+        (midi-player
+          :test-player
+          :channel 1
+          :up (stub :up))
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :channel 1})
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5
+           :channel 2})
+
+        (sync-event
+          [:midi :key :up]
+          {:note 60
+           :velocity-f 0.5
+           :channel 1})
+
+        (sync-event
+          [:midi :key :up]
+          {:note 60
+           :velocity-f 0.5
+           :channel 2})
+
+        (should-have-invoked :up {:times 1}))))
 
 (describe "remove-midi-player"
   (it "should invoke the player's teardown hook"

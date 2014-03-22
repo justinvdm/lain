@@ -92,7 +92,7 @@
 
   (let [bend-offset (atom 0)]
     (midi-player
-      :key-player
+      :midi-key-player
       :device-name device-name
       :down-event down-event
       :up-event up-event

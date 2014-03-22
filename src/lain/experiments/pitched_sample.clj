@@ -1,8 +1,8 @@
 (ns lain.experiments.pitched-sample
-  (:require [overtone.live :refer :all]
+  (:require [overtone.core :refer :all]
             [lain.a300.events :refer [handle-a300-events]]
             [lain.a300.play :refer [midi-key-player
-                                    remove-all-key-players]]
+                                    remove-all-midi-players]]
             [lain.a300.control :refer [value-controller
                                        remove-all-controllers]]
             [lain.insts :refer [key-inst]]
@@ -19,14 +19,13 @@
   [freq 440]
   (let
     [scale (/ freq !base-freq)]
-    (warp1 
-      :num-channels 1
-      :bufnum !glock-buf
-      :freq-scale scale
-      :window-size (in:kr !window-size-bus)
-      :overlaps (in:kr !overlaps-bus)
-      :window-rand-ratio (in:kr !window-rand-ratio-bus)
-      :interp 4)))
+    (warp1 :num-channels 1
+           :bufnum !glock-buf
+           :freq-scale scale
+           :window-size (in:kr !window-size-bus)
+           :overlaps (in:kr !overlaps-bus)
+           :window-rand-ratio (in:kr !window-rand-ratio-bus)
+           :interp 4)))
 
 (def glock
   (key-inst
@@ -36,7 +35,6 @@
           :sustain 1
           :release 2.5 :level 2)))
 
-
 (comment
   (handle-a300-events)
 
@@ -44,8 +42,10 @@
   (value-controller !window-rand-ratio-bus [:midi :r2])
   (value-controller !overlaps-bus [:midi :r3] :extent [0 8])
 
-  (midi-key-player glock)
+  (midi-key-player glock :device-name "VirMIDI [default]")
+  ())
 
+(comment
   (remove-all-controllers)
-  (remove-all-key-players)
-())
+  (remove-all-midi-players)
+  ())

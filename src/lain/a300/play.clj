@@ -89,7 +89,6 @@
                                     :or {down-event [:midi :key :down]
                                          up-event [:midi :key :up]
                                          device-name nil}}]
-
   (let [bend-offset (atom 0)]
     (midi-player
       :midi-key-player
@@ -129,7 +128,6 @@
                                          :or {down-event [:midi :pad :down]
                                               up-event [:midi :pad :up]
                                               device-name nil}}]
-
   (midi-player
     :midi-buf-player
     :device-name device-name
@@ -143,3 +141,22 @@
         (player-fn
           :buf buf
           :velocity-f velocity-f)))))
+
+
+(defn midi-perc-player [player-fns & {:keys [down-event
+                                             up-event
+                                             device-name]
+                                      :or {down-event [:midi :pad :down]
+                                           up-event [:midi :pad :up]
+                                           device-name nil}}]
+  (midi-player
+    :midi-perc-player
+    :device-name device-name
+    :down-event down-event
+    :up-event up-event
+
+    :down
+    (fn [{note :note
+          velocity-f :velocity-f}]
+      (when-let [player-fn (get player-fns note)]
+        (player-fn :velocity-f velocity-f)))))

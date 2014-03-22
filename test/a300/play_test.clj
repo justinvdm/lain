@@ -103,85 +103,114 @@
                                          true]
                                   :times 1})))
 
-      (it "should ignore the event if no corresponding down event has happened"
-        (midi-player :test-player :up (stub :up))
+    (it "should ignore the event if no corresponding down event has happened"
+      (midi-player :test-player :up (stub :up))
 
-        (sync-event
-          [:midi :key :down]
-          {:note 60
-           :velocity-f 0.5})
+      (sync-event
+        [:midi :key :down]
+        {:note 60
+         :velocity-f 0.5})
 
-        (sync-event
-          [:midi :key :down]
-          {:note 60
-           :velocity-f 0.5})
+      (sync-event
+        [:midi :key :down]
+        {:note 60
+         :velocity-f 0.5})
 
-        (sync-event
-          [:midi :key :up]
-          {:note 60
-           :velocity-f 0.5})
+      (sync-event
+        [:midi :key :up]
+        {:note 60
+         :velocity-f 0.5})
 
-        (should-have-invoked :up {:times 1}))
+      (should-have-invoked :up {:times 1}))
 
-      (it "should ignore the event if it belongs to another device"
-        (midi-player
-          :test-player
-          :device "device-foo"
-          :up (stub :up))
+(it "should ignore the event if it belongs to another device"
+  (midi-player
+    :test-player
+    :device "device-foo"
+    :up (stub :up))
 
-        (sync-event
-          [:midi :key :down]
-          {:note 60
-           :velocity-f 0.5
-           :device {:name "device-foo"}})
+  (sync-event
+    [:midi :key :down]
+    {:note 60
+     :velocity-f 0.5
+     :device {:name "device-foo"}})
 
-        (sync-event
-          [:midi :key :down]
-          {:note 60
-           :velocity-f 0.5
-           :device {:name "device-foo"}})
+  (sync-event
+    [:midi :key :down]
+    {:note 60
+     :velocity-f 0.5
+     :device {:name "device-foo"}})
 
-        (sync-event
-          [:midi :key :up]
-          {:note 60
-           :velocity-f 0.5
-           :device {:name "device-bar"}})
+  (sync-event
+    [:midi :key :up]
+    {:note 60
+     :velocity-f 0.5
+     :device {:name "device-bar"}})
 
-        (should-have-invoked :up {:times 1})))
+  (should-have-invoked :up {:times 1})))
 
-  (describe "remove-midi-player"
-    (it "should invoke the player's teardown hook"
-      (remove-midi-player (midi-player :test-player :teardown (stub :teardown)))
-      (should-have-invoked :teardown {:times 1}))
+(describe "remove-midi-player"
+  (it "should invoke the player's teardown hook"
+    (remove-midi-player (midi-player :test-player :teardown (stub :teardown)))
+    (should-have-invoked :teardown {:times 1}))
 
-    (it "should stop listening to key press events associated with the player"
+  (it "should stop listening to key press events associated with the player"
+    (should-invoke
+      remove-event-handler
+      {:with [[:test-player :midi :key :down]]}
+      (remove-midi-player (midi-player :test-player))))
+
+  (it "should stop listening to key release events associated with the player"
+    (should-invoke
+      remove-event-handler
+      {:with [[:test-player :midi :key :up]]}
+      (remove-midi-player (midi-player :test-player)))))
+
+(describe "remove-all-midi-players"
+  (it "should remove all midi players"
+    (midi-player :foo)
+    (midi-player :bar)
+
+    (should-invoke
+      remove-midi-player
+      {:with [0] :times 1}
+      {:with [1] :times 1}
+      (remove-all-midi-players))))
+
+(describe "midi-key-player"
+  (describe "when a key is pressed"
+    (it "should play the player function"
+      (midi-key-player (stub :play))
+
+      (sync-event
+        [:midi :key :down]
+        {:note 60
+         :velocity-f 0.5})
+
+      (sync-event
+        [:midi :key :down]
+        {:note 61
+         :velocity-f 0.5})
+
+      (should-have-invoked :play {:with [:note 60
+                                         :freq (midi->hz 60)
+                                         :velocity-f 0.5]
+                                  :times 1})
+
+      (should-have-invoked :play {:with [:note 61
+                                         :freq (midi->hz 61)
+                                         :velocity-f 0.5]
+                                  :times 1})))
+
+  (describe "when a key is released"
+    (it "should zeroize the gate of the player function for that note"
+      (midi-key-player
+        (stub :play {:invoke (fn [_ _ _ _ _ _] (next-id :fake-node))}))
+
       (should-invoke
-        remove-event-handler
-        {:with [[:test-player :midi :key :down]]}
-        (remove-midi-player (midi-player :test-player))))
-
-    (it "should stop listening to key release events associated with the player"
-      (should-invoke
-        remove-event-handler
-        {:with [[:test-player :midi :key :up]]}
-        (remove-midi-player (midi-player :test-player)))))
-
-  (describe "remove-all-midi-players"
-    (it "should remove all midi players"
-      (midi-player :foo)
-      (midi-player :bar)
-
-      (should-invoke
-        remove-midi-player
-        {:with [0] :times 1}
-        {:with [1] :times 1}
-        (remove-all-midi-players))))
-
-  (describe "midi-key-player"
-    (describe "when a key is pressed"
-      (it "should play the player function"
-        (midi-key-player (stub :play))
-
+        ctl
+        {:with [1 :gate 0]
+         :times 1}
         (sync-event
           [:midi :key :down]
           {:note 60
@@ -192,39 +221,10 @@
           {:note 61
            :velocity-f 0.5})
 
-        (should-have-invoked :play {:with [:note 60
-                                           :freq (midi->hz 60)
-                                           :velocity-f 0.5]
-                                    :times 1})
-
-        (should-have-invoked :play {:with [:note 61
-                                           :freq (midi->hz 61)
-                                           :velocity-f 0.5]
-                                    :times 1})))
-
-    (describe "when a key is released"
-      (it "should zeroize the gate of the player function for that note"
-        (midi-key-player
-          (stub :play {:invoke (fn [_ _ _ _ _ _] (next-id :fake-node))}))
-
-        (should-invoke
-          ctl
-          {:with [1 :gate 0]
-           :times 1}
-          (sync-event
-            [:midi :key :down]
-            {:note 60
-             :velocity-f 0.5})
-
-          (sync-event
-            [:midi :key :down]
-            {:note 61
-             :velocity-f 0.5})
-
-          (sync-event
-            [:midi :key :up]
-            {:note 61
-             :velocity-f 0.5}))))
+        (sync-event
+          [:midi :key :up]
+          {:note 61
+           :velocity-f 0.5}))))
 
   (describe "bend-midi-keys"
     (it "should bend the key player's active notes"
@@ -232,13 +232,13 @@
             player-id (midi-key-player play)]
 
         (sync-event
-            [:midi :key :down]
-            {:note 60
-             :velocity-f 0.5})
-          (sync-event
-            [:midi :key :down]
-            {:note 61
-             :velocity-f 0.5})
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5})
+        (sync-event
+          [:midi :key :down]
+          {:note 61
+           :velocity-f 0.5})
 
         (should-invoke
           ctl
@@ -279,8 +279,8 @@
   (describe "midi-buf-player"
     (describe "when the down event is emitted"
       (it "should play the player function"
-        (midi-buf-player (stub :play) {2 "buf-2"
-                                  3 "buf-3"})
+        (midi-buf-player (stub :play) {2 :buf-2
+                                       3 :buf-3})
 
         (sync-event
           [:midi :pad :down]
@@ -292,9 +292,30 @@
           {:note 3
            :velocity-f 0.5})
 
-        (should-have-invoked :play {:with [:buf "buf-2"
+        (should-have-invoked :play {:with [:buf :buf-2
                                            :velocity-f 0.6]
                                     :times 1})
-        (should-have-invoked :play {:with [:buf "buf-3"
+        (should-have-invoked :play {:with [:buf :buf-3
                                            :velocity-f 0.5]
-                                    :times 1}))))))
+                                    :times 1})))))
+
+  (describe "midi-perc-player"
+    (describe "when the down event is emitted"
+      (it "should play the associated player function"
+        (midi-perc-player {2 (stub :play-2)
+                           3 (stub :play-3)})
+
+        (sync-event
+          [:midi :pad :down]
+          {:note 2
+           :velocity-f 0.6})
+
+        (sync-event
+          [:midi :pad :down]
+          {:note 3
+           :velocity-f 0.5})
+
+        (should-have-invoked :play-2 {:with [:velocity-f 0.6]
+                                      :times 1})
+        (should-have-invoked :play-3 {:with [:velocity-f 0.5]
+                                      :times 1})))))

@@ -1,6 +1,7 @@
 (ns lain.a300.play-test
   (:require [speclj.core :refer :all]
-            [overtone.sc.node :refer [ctl]]
+            [overtone.sc.node :refer [ctl
+                                      node-active?]]
             [overtone.libs.counters :refer [next-id
                                             reset-all-counters!]]
             [overtone.libs.event :refer [sync-event
@@ -264,24 +265,47 @@
       (midi-key-player
         (stub :play {:invoke (fn [_ _ _ _ _ _] (next-id :fake-node))}))
 
-      (should-invoke
-        ctl
-        {:with [1 :gate 0]
-         :times 1}
-        (sync-event
-          [:midi :key :down]
-          {:note 60
-           :velocity-f 0.5})
+      (with-redefs [node-active? (stub :node-active? {:return true})]
+        (should-invoke
+          ctl
+          {:with [1 :gate 0]
+           :times 1}
+          (sync-event
+            [:midi :key :down]
+            {:note 60
+             :velocity-f 0.5})
 
-        (sync-event
-          [:midi :key :down]
-          {:note 61
-           :velocity-f 0.5})
+          (sync-event
+            [:midi :key :down]
+            {:note 61
+             :velocity-f 0.5})
 
-        (sync-event
-          [:midi :key :up]
-          {:note 61
-           :velocity-f 0.5}))))
+          (sync-event
+            [:midi :key :up]
+            {:note 61
+             :velocity-f 0.5}))))
+
+    (it "should not zeroize the gate of the note is inactive"
+      (midi-key-player
+        (stub :play {:invoke (fn [_ _ _ _ _ _] (next-id :fake-node))}))
+
+      (with-redefs [node-active? (stub :node-active? {:return false})]
+        (should-not-invoke
+          ctl
+          (sync-event
+            [:midi :key :down]
+            {:note 60
+             :velocity-f 0.5})
+
+          (sync-event
+            [:midi :key :down]
+            {:note 61
+             :velocity-f 0.5})
+
+          (sync-event
+            [:midi :key :up]
+            {:note 61
+             :velocity-f 0.5})))))
 
   (describe "bend-midi-keys"
     (it "should bend the key player's active notes"

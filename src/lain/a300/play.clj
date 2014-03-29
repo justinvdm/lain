@@ -1,5 +1,5 @@
 (ns lain.a300.play
-  (:require [overtone.sc.node :refer [ctl]]
+  (:require [overtone.sc.node :refer [ctl node-active?]]
             [overtone.libs.counters :refer [next-id]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
@@ -121,7 +121,8 @@
 
       :up
       (fn [e node-id]
-        (ctl node-id :gate 0)))))
+        (if (node-active? node-id)
+          (ctl node-id :gate 0))))))
 
 
 (defn bend-midi-keys

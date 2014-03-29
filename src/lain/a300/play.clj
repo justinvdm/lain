@@ -1,5 +1,6 @@
 (ns lain.a300.play
-  (:require [overtone.sc.node :refer [ctl node-active?]]
+  (:require [overtone.sc.node :refer [ctl
+                                      node-active?]]
             [overtone.libs.counters :refer [next-id]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
@@ -173,3 +174,33 @@
           velocity-f :velocity-f}]
       (when-let [player-fn (get player-fns note)]
         (player-fn :velocity-f velocity-f)))))
+
+
+(defn midi-mono-player [player-fn & {:keys [down-event
+                                           up-event
+                                           device-name]
+                                    :or {down-event [:midi :key :down]
+                                         up-event [:midi :key :up]
+                                         device-name nil}}]
+  (let [node-id (atom nil)]
+    (midi-player
+      :midi-mono-player
+      :device-name device-name
+      :down-event down-event
+      :up-event up-event
+
+      :down
+      (fn [{note :note
+            velocity-f :velocity-f}]
+        (let [play-args [:note note
+                         :freq (midi->hz note)
+                         :velocity-f velocity-f
+                         :gate 1]]
+          (if (node-active? @node-id)
+            (apply ctl (cons @node-id play-args))
+            (reset! node-id (apply player-fn play-args)))))
+
+      :up
+      (fn [e _]
+        (if (node-active? @node-id)
+          (ctl @node-id :gate 0))))))

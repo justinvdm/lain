@@ -399,4 +399,66 @@
         (should-have-invoked :play-2 {:with [:velocity-f 0.6]
                                       :times 1})
         (should-have-invoked :play-3 {:with [:velocity-f 0.5]
-                                      :times 1})))))
+                                      :times 1}))))
+
+  (describe "midi-mono-player"
+    (describe "when a key is pressed"
+      (it "should control the active node if the node is active"
+        (midi-mono-player
+          (stub :play {:invoke (fn [_ _ _ _ _ _ _ _] (next-id :fake-node))}))
+
+        (sync-event
+              [:midi :key :down]
+              {:note 60
+               :velocity-f 0.5})
+
+        (with-redefs [node-active? (stub :node-active? {:return true})]
+          (should-invoke
+            ctl
+            {:with [0
+                    :note 61
+                    :freq (midi->hz 61)
+                    :velocity-f 0.5
+                    :gate 1]
+             :times 1}
+            (sync-event
+              [:midi :key :down]
+              {:note 61
+               :velocity-f 0.5})))))
+
+    (describe "when a key is released"
+      (it "should zeroize the gate if it the node is active"
+        (midi-mono-player
+          (stub :play {:invoke (fn [_ _ _ _ _ _ _ _] (next-id :fake-node))}))
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5})
+
+        (with-redefs [node-active? (stub :node-active? {:return true})]
+          (should-invoke
+            ctl
+            {:with [0 :gate 0]
+             :times 1}
+            (sync-event
+              [:midi :key :up]
+              {:note 60
+               :velocity-f 0.5}))))
+
+      (it "should not zeroize the gate of the node is inactive"
+        (midi-mono-player
+          (stub :play {:invoke (fn [_ _ _ _ _ _ _ _] (next-id :fake-node))}))
+
+        (with-redefs [node-active? (stub :node-active? {:return false})]
+          (sync-event
+            [:midi :key :down]
+            {:note 60
+             :velocity-f 0.5})
+
+          (should-not-invoke
+            ctl
+            (sync-event
+              [:midi :key :up]
+              {:note 60
+               :velocity-f 0.5})))))))

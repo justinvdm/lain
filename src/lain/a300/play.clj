@@ -7,7 +7,7 @@
             [overtone.music.pitch :refer [midi->hz]]
             [overtone.sc.envelope :refer [perc]]))
 
-(defonce midi-players (atom {}))
+(defonce players (atom {}))
 
 (defn bend-note [note offset]
   (let [bent-note (+ note offset)]
@@ -15,22 +15,22 @@
      :freq (midi->hz bent-note)]))
 
 
-(defn midi-player [player-key & {:keys [down-event 
-                                        up-event
-                                        down
-                                        up
-                                        setup
-                                        teardown
-                                        device-name
-                                        channel]
-                                 :or {down-event [:midi :key :down]
-                                      up-event [:midi :key :up]
-                                      down (fn [& _] ())
-                                      up (fn [& _] ())
-                                      setup identity
-                                      teardown (fn [& _] ())
-                                      device-name nil
-                                      channel nil}}]
+(defn player [player-key & {:keys [down-event 
+                                   up-event
+                                   down
+                                   up
+                                   setup
+                                   teardown
+                                   device-name
+                                   channel]
+                            :or {down-event [:midi :key :down]
+                                 up-event [:midi :key :up]
+                                 down (fn [& _] ())
+                                 up (fn [& _] ())
+                                 setup identity
+                                 teardown (fn [& _] ())
+                                 device-name nil
+                                 channel nil}}]
   (let [down-event-key
         (concat [player-key] down-event)
 
@@ -71,7 +71,7 @@
             (swap! notes dissoc note))))
       up-event-key)
 
-    (let [player-id (next-id :midi-player)
+    (let [player-id (next-id :player)
           player {:player-id player-id
                   :setup setup
                   :teardown teardown
@@ -80,35 +80,35 @@
                   :notes notes
                   :params params}
           player (setup player)]
-      (swap! midi-players assoc player-id player)
+      (swap! players assoc player-id player)
       player-id)))
 
 
-(defn remove-midi-player [player-id]
-  (let [player (get @midi-players player-id)
+(defn remove-player [player-id]
+  (let [player (get @players player-id)
         {down-event-key :down-event-key
          up-event-key :up-event-key} player]
     ((:teardown player) player)
     (remove-event-handler down-event-key)
     (remove-event-handler up-event-key)
-    (swap! midi-players dissoc player-id)))
+    (swap! players dissoc player-id)))
 
 
-(defn remove-all-midi-players []
+(defn remove-all-players []
   (doseq
-    [[player-id player] @midi-players] 
-    (remove-midi-player player-id)))
+    [[player-id player] @players] 
+    (remove-player player-id)))
 
 
-(defn midi-key-player [player-fn & {:keys [down-event
-                                           up-event
-                                           device-name]
-                                    :or {down-event [:midi :key :down]
-                                         up-event [:midi :key :up]
-                                         device-name nil}}]
+(defn key-player [player-fn & {:keys [down-event
+                                      up-event
+                                      device-name]
+                               :or {down-event [:midi :key :down]
+                                    up-event [:midi :key :up]
+                                    device-name nil}}]
   (let [bend-offset (atom 0)]
-    (midi-player
-      :midi-key-player
+    (player
+      :key-player
       :device-name device-name
       :down-event down-event
       :up-event up-event
@@ -131,9 +131,9 @@
           (ctl node-id :gate 0))))))
 
 
-(defn ctl-midi-player [player-id & params]
+(defn ctl-player [player-id & params]
   (let [{curr-params :params
-         notes :notes} (get @midi-players player-id)]
+         notes :notes} (get @players player-id)]
     (swap! curr-params conj (apply hash-map params))
     (doseq
       [[note node-id] @notes] 
@@ -144,21 +144,21 @@
 (defn bend-midi-keys
   [player-id
    bend-offset]
-  (let [player (get @midi-players player-id)]
+  (let [player (get @players player-id)]
     (reset! (:bend-offset player) bend-offset)
     (doseq
       [[note node-id] @(:notes player)] 
       (apply ctl node-id (-> (bend-note bend-offset note) vec flatten)))))
 
 
-(defn midi-buf-player [player-fn bufs & {:keys [down-event
-                                                up-event
-                                                device-name]
-                                         :or {down-event [:midi :pad :down]
-                                              up-event [:midi :pad :up]
-                                              device-name nil}}]
-  (midi-player
-    :midi-buf-player
+(defn buf-player [player-fn bufs & {:keys [down-event
+                                           up-event
+                                           device-name]
+                                    :or {down-event [:midi :pad :down]
+                                         up-event [:midi :pad :up]
+                                         device-name nil}}]
+  (player
+    :buf-player
     :device-name device-name
     :down-event down-event
     :up-event up-event
@@ -174,14 +174,14 @@
                params)))))
 
 
-(defn midi-perc-player [player-fns & {:keys [down-event
-                                             up-event
-                                             device-name]
-                                      :or {down-event [:midi :pad :down]
-                                           up-event [:midi :pad :up]
-                                           device-name nil}}]
-  (midi-player
-    :midi-perc-player
+(defn perc-player [player-fns & {:keys [down-event
+                                        up-event
+                                        device-name]
+                                 :or {down-event [:midi :pad :down]
+                                      up-event [:midi :pad :up]
+                                      device-name nil}}]
+  (player
+    :perc-player
     :device-name device-name
     :down-event down-event
     :up-event up-event
@@ -196,15 +196,15 @@
                params)))))
 
 
-(defn midi-mono-player [player-fn & {:keys [down-event
-                                            up-event
-                                            device-name]
-                                     :or {down-event [:midi :key :down]
-                                          up-event [:midi :key :up]
-                                          device-name nil}}]
+(defn mono-player [player-fn & {:keys [down-event
+                                       up-event
+                                       device-name]
+                                :or {down-event [:midi :key :down]
+                                     up-event [:midi :key :up]
+                                     device-name nil}}]
   (let [node-id (atom nil)]
-    (midi-player
-      :midi-mono-player
+    (player
+      :mono-player
       :device-name device-name
       :down-event down-event
       :up-event up-event

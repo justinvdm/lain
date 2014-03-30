@@ -1,8 +1,8 @@
 (ns lain.experiments.pitched-sample
   (:require [overtone.core :refer :all]
             [lain.a300.events :refer [handle-a300-events]]
-            [lain.a300.play :refer [midi-key-player
-                                    remove-all-midi-players]]
+            [lain.a300.play :refer [key-player
+                                    remove-all-players]]
             [lain.a300.control :refer [bus-controller
                                        remove-all-controllers]]
             [lain.insts :refer [key-inst]]
@@ -42,10 +42,10 @@
   (bus-controller !window-rand-ratio-bus [:midi :r2])
   (bus-controller !overlaps-bus [:midi :r3] :extent [0 8])
 
-  (midi-key-player glock :device-name "VirMIDI [default]")
+  (key-player glock :device-name "VirMIDI [default]")
   ())
 
 (comment
   (remove-all-controllers)
-  (remove-all-midi-players)
+  (remove-all-players)
   ())

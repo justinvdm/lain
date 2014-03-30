@@ -1,8 +1,8 @@
 (ns lain.experiments.warped
   (:require [overtone.core :refer :all]
             [lain.a300.events :refer [handle-a300-events]]
-            [lain.a300.play :refer [midi-key-player
-                                    remove-all-midi-players]]
+            [lain.a300.play :refer [key-player
+                                    remove-all-players]]
             [lain.insts :refer [key-inst]]
             [lain.utils :refer [deflcgen]]))
 
@@ -28,9 +28,9 @@
 (comment
   (handle-a300-events)
   (warp)
-  (midi-key-player warpy :device-name "VirMIDI [default]")
+  (key-player warpy :device-name "VirMIDI [default]")
   ())
 
 (comment
-  (remove-all-midi-players)
+  (remove-all-players)
   ())

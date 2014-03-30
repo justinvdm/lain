@@ -6,7 +6,7 @@
                                             reset-all-counters!]]
             [overtone.libs.event :refer [sync-event
                                          remove-event-handler]]
-            [lain.a300.play :refer [ctl-midi-player]]
+            [lain.a300.play :refer [ctl-player]]
             [lain.a300.control :refer :all]))
 
 (describe "control"
@@ -20,7 +20,7 @@
     (describe "when the event is emitted"
       (it "invoke the controller function"
         (controller [:event-a]
-          :controller-fn (stub :controller-fn))
+                    :controller-fn (stub :controller-fn))
 
         (sync-event
           [:event-a]
@@ -31,8 +31,8 @@
 
       (it "should map the event's value to the given extent"
         (controller [:event-a]
-          :controller-fn (stub :controller-fn)
-          :extent [0 100])
+                    :controller-fn (stub :controller-fn)
+                    :extent [0 100])
 
         (sync-event
           [:event-a]
@@ -43,8 +43,8 @@
 
       (it "should pass the value through the given modifier function"
         (controller [:event-a]
-          :controller-fn (stub :controller-fn)
-          :modifier inc)
+                    :controller-fn (stub :controller-fn)
+                    :modifier inc)
 
         (sync-event
           [:event-a]
@@ -83,7 +83,7 @@
         (player-param-controller :player-a :param-a [:event-a])
 
         (should-invoke
-          ctl-midi-player
+          ctl-player
           {:with [:player-a :param-a 0.8]}
           (sync-event
             [:event-a]

@@ -1,8 +1,8 @@
 (ns lain.experiments.woo
   (:require [overtone.core :refer :all]
             [lain.a300.events :refer [handle-a300-events]]
-            [lain.a300.play :refer [midi-mono-player
-                                    remove-all-midi-players]]
+            [lain.a300.play :refer [mono-player
+                                    remove-all-players]]
             [lain.a300.control :refer [value-controller
                                        remove-all-controllers]]
             [lain.insts :refer [key-inst]]
@@ -28,7 +28,7 @@
 (comment
   (handle-a300-events)
 
-  (midi-mono-player
+  (mono-player
     (key-inst woo (adsr :sustain 1
                         :decay 3
                         :release 8))
@@ -38,5 +38,5 @@
   ())
 
 (comment
-  (remove-all-midi-players)
+  (remove-all-players)
   ())

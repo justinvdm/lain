@@ -5,7 +5,7 @@
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
             [lain.utils :refer [lin-interpolator]]
-            [lain.a300.play :refer [ctl-midi-player]]))
+            [lain.a300.play :refer [ctl-player]]))
 
 (defonce controllers (atom {}))
 
@@ -74,7 +74,7 @@
 
               :controller-fn
               (fn [value-f]
-                (ctl-midi-player player-id param-key value-f))))
+                (ctl-player player-id param-key value-f))))
 
 
 (defn remove-controller [controller-id]

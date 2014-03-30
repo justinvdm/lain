@@ -1,5 +1,6 @@
 (ns lain.a300.control
-  (:require [overtone.sc.bus :refer [control-bus-set!]]
+  (:require [overtone.sc.node :refer [ctl]]
+            [overtone.sc.bus :refer [control-bus-set!]]
             [overtone.libs.counters :refer [next-id]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
@@ -41,6 +42,15 @@
     :controller-fn (fn [value-f] (control-bus-set! bus value-f))
     :extent extent
     :modifier modifier))
+
+
+(defn param-controller [node-id param-key event-type & {:keys [extent modifier]
+                                                        :or {extent [0 1]
+                                                             modifier identity}}]
+  (controller event-type
+              :controller-fn (fn [value-f] (ctl node-id param-key value-f))
+              :extent extent
+              :modifier modifier))
 
 
 (defn remove-controller [controller-id]

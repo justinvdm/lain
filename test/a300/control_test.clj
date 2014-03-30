@@ -1,5 +1,6 @@
 (ns lain.a300.control-test
   (:require [speclj.core :refer :all]
+            [overtone.sc.node :refer [ctl]]
             [overtone.sc.bus :refer [control-bus-set!]]
             [overtone.libs.counters :refer [next-id
                                             reset-all-counters!]]
@@ -59,6 +60,18 @@
         (should-invoke
           control-bus-set!
           {:with [:bus-a 0.8]}
+          (sync-event
+            [:event-a]
+            {:value-f 0.8})))))
+
+  (describe "param-controller"
+    (describe "when the event is emitted"
+      (it "should control the node's param"
+        (param-controller :synth-a :param-a [:event-a])
+
+        (should-invoke
+          ctl
+          {:with [:synth-a :param-a 0.8]}
           (sync-event
             [:event-a]
             {:value-f 0.8})))))

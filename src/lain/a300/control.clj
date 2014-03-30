@@ -10,7 +10,6 @@
 
 
 (defn controller [event-type & {:keys [controller-fn
-
                                        extent
                                        modifier]
                                 :or {controller-fn (fn [_] ())

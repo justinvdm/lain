@@ -9,6 +9,11 @@
             [overtone.music.pitch :refer [midi->hz]]
             [lain.a300.play :refer :all]))
 
+
+(defn next-fake-node [& _]
+  (next-id :fake-node))
+
+
 (describe "play"
   (with-stubs)
 
@@ -209,6 +214,56 @@
 
         (should-have-invoked :up {:times 1}))))
 
+  (describe "ctl-midi-player"
+    (it "should control the player's active notes"
+      (let [player-id (midi-player :test-player
+                                   :down (stub :down {:invoke next-fake-node}))]
+        (with-redefs [node-active?
+                      (stub :node-active? {:invoke boolean})]
+
+          (sync-event
+            [:midi :key :down]
+            {:note 60
+             :velocity-f 0.5})
+
+          (sync-event
+            [:midi :key :down]
+            {:note 61
+             :velocity-f 0.5})
+
+            (should-invoke
+              ctl
+              {:with [0 :foo 23]
+               :times 1}
+              {:with [1 :foo 23]
+               :times 0}
+              (ctl-midi-player player-id :foo 23)))))
+
+    (it "should use the given params for newly played notes"
+      (let [player-id (midi-player :test-player
+                                   :down (stub :down))]
+        (ctl-midi-player player-id :foo 23)
+
+        (sync-event
+          [:midi :key :down]
+          {:note 60
+           :velocity-f 0.5})
+
+        (sync-event
+          [:midi :key :down]
+          {:note 61
+           :velocity-f 0.5})
+
+        (should-have-invoked :down {:with [{:note 60
+                                            :velocity-f 0.5}
+                                           [:foo 23]]
+                                    :times 1})
+
+        (should-have-invoked :down {:with [{:note 61
+                                            :velocity-f 0.5}
+                                           [:foo 23]]
+                                    :times 1}))))
+
   (describe "remove-midi-player"
     (it "should invoke the player's teardown hook"
       (remove-midi-player (midi-player :test-player :teardown (stub :teardown)))
@@ -265,7 +320,7 @@
     (describe "when a key is released"
       (it "should zeroize the gate of the player function for that note"
         (midi-key-player
-          (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
+          (stub :play {:invoke next-fake-node}))
 
         (with-redefs [node-active? (stub :node-active? {:return true})]
           (should-invoke
@@ -289,7 +344,7 @@
 
       (it "should not zeroize the gate of the note is inactive"
         (midi-key-player
-          (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
+          (stub :play {:invoke next-fake-node}))
 
         (with-redefs [node-active? (stub :node-active? {:return false})]
           (should-not-invoke
@@ -311,7 +366,7 @@
 
     (describe "bend-midi-keys"
       (it "should bend the key player's active notes"
-        (let [play (stub :play {:invoke (fn [& _] (next-id :fake-node))})
+        (let [play (stub :play {:invoke next-fake-node})
               player-id (midi-key-player play)]
 
           (sync-event
@@ -407,7 +462,7 @@
       (describe "when a key is pressed"
         (it "should control the active node if the node is active"
           (midi-mono-player
-            (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
+            (stub :play {:invoke next-fake-node}))
 
           (sync-event
                 [:midi :key :down]
@@ -431,7 +486,7 @@
       (describe "when a key is released"
         (it "should zeroize the gate if it the node is active"
           (midi-mono-player
-            (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
+            (stub :play {:invoke next-fake-node}))
 
           (sync-event
             [:midi :key :down]
@@ -450,7 +505,7 @@
 
         (it "should not zeroize the gate of the node is inactive"
           (midi-mono-player
-            (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
+            (stub :play {:invoke next-fake-node}))
 
           (with-redefs [node-active? (stub :node-active? {:return false})]
             (sync-event

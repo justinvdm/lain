@@ -77,7 +77,8 @@
                   :teardown teardown
                   :down-event-key down-event-key
                   :up-event-key up-event-key
-                  :notes notes}
+                  :notes notes
+                  :params params}
           player (setup player)]
       (swap! midi-players assoc player-id player)
       player-id)))
@@ -128,6 +129,16 @@
       (fn [e node-id]
         (if (node-active? node-id)
           (ctl node-id :gate 0))))))
+
+
+(defn ctl-midi-player [player-id & params]
+  (let [{curr-params :params
+         notes :notes} (get @midi-players player-id)]
+    (swap! curr-params conj (apply hash-map params))
+    (doseq
+      [[note node-id] @notes] 
+      (if (node-active? node-id)
+        (apply ctl node-id params)))))
 
 
 (defn bend-midi-keys

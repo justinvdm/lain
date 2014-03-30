@@ -7,15 +7,18 @@
 
 (defonce controllers (atom {}))
 
-(defn bus-controller [bus event-type & {:keys [extent modifier]
-                                          :or {extent [0 1]
-                                               modifier identity}}]
+
+(defn controller [event-type & {:keys [controller-fn
+
+                                       extent
+                                       modifier]
+                                :or {controller-fn (fn [_] ())
+                                     extent [0 1]
+                                     modifier identity}}]
   (let [interpolator (lin-interpolator [0 1] extent)
         event-key (concat [:controller] event-type)
         controller-id (next-id :controller)
         controller-data {:event-key event-key}]
-
-    (swap! controllers assoc controller-id controller-data)
 
     (on-event
       event-type
@@ -24,16 +27,28 @@
         (let
           [value (interpolator value-f)
            value (modifier value)]
-          (control-bus-set! bus value)))
+          (controller-fn value)))
       event-key)
 
+    (swap! controllers assoc controller-id controller-data)
     controller-id))
+
+
+(defn bus-controller [bus event-type & {:keys [extent modifier]
+                                          :or {extent [0 1]
+                                               modifier identity}}]
+  (controller event-type
+    :controller-fn (fn [value-f] (control-bus-set! bus value-f))
+    :extent extent
+    :modifier modifier))
+
 
 (defn remove-controller [controller-id]
   (let
     [{event-key :event-key} (get @controllers controller-id)]
     (remove-event-handler event-key)
     (swap! controllers dissoc controller-id)))
+
 
 (defn remove-all-controllers []
   (doseq

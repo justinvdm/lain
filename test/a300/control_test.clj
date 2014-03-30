@@ -2,83 +2,81 @@
   (:require [speclj.core :refer :all]
             [overtone.sc.bus :refer [control-bus-set!]]
             [overtone.libs.counters :refer [next-id
-                                            reset-counter!]]
-            [overtone.libs.event :refer [event
+                                            reset-all-counters!]]
+            [overtone.libs.event :refer [sync-event
                                          remove-event-handler]]
             [lain.a300.control :refer :all]))
 
-(def removed-handlers (atom []))
-(def bus-a (atom 0))
-(def bus-b (atom 0))
-
 (describe "control"
+  (with-stubs)
 
-  (around [it]
-    [(with-redefs
-       [control-bus-set! #(reset! %1 %2)]
-       (it))
-     (remove-all-controllers)
-     (reset-counter! :controller)
-     (reset! bus-a 0)
-     (reset! bus-b 0)])
+  (before
+    [(remove-all-controllers)
+     (reset-all-counters!)])
 
-  (describe "bus-controller"
-
+  (describe "controller"
     (describe "when the event is emitted"
+      (it "invoke the controller function"
+        (controller [:event-a]
+          :controller-fn (stub :controller-fn))
 
-      (it "should change the value of the bus to the event's value"
-        (bus-controller bus-a [:event-a])
-
-        (event
+        (sync-event
           [:event-a]
           {:value-f 0.8})
-        (Thread/sleep 20)
 
-        (should= @bus-a 0.8))
+        (should-have-invoked :controller-fn {:with [0.8]
+                                             :times 1}))
 
       (it "should map the event's value to the given extent"
-        (bus-controller bus-a [:event-a] :extent [0 100])
+        (controller [:event-a]
+          :controller-fn (stub :controller-fn)
+          :extent [0 100])
 
-        (event
+        (sync-event
           [:event-a]
           {:value-f 0.8})
-        (Thread/sleep 20)
 
-        (should= @bus-a 80.0))
+        (should-have-invoked :controller-fn {:with [80.0]
+                                             :times 1}))
 
       (it "should pass the value through the given modifier function"
-        (bus-controller bus-a [:event-a] :modifier inc)
+        (controller [:event-a]
+          :controller-fn (stub :controller-fn)
+          :modifier inc)
 
-        (event
+        (sync-event
           [:event-a]
           {:value-f 0.8})
-        (Thread/sleep 20)
 
-        (should= @bus-a 1.8))))
-    
+        (should-have-invoked :controller-fn {:with [1.8]
+                                             :times 1}))))
+
+  (describe "bus-controller"
+    (describe "when the event is emitted"
+      (it "should change the value of the bus to the event's value"
+        (bus-controller :bus-a [:event-a])
+
+        (should-invoke
+          control-bus-set!
+          {:with [:bus-a 0.8]}
+          (sync-event
+            [:event-a]
+            {:value-f 0.8})))))
 
   (describe "remove-controller"
-
-    (around [it]
-      [(reset! removed-handlers [])
-       (with-redefs
-         [remove-event-handler #(swap! removed-handlers conj %&)]
-         (it))])
-
     (it "should stop listening to the event associated with the controller"
-      (remove-controller (bus-controller bus-a [:event-a]))
-      (should-contain [[:controller :event-a]] @removed-handlers)))
+      (should-invoke
+        remove-event-handler
+        {:with [[:controller :event-a]]}
+        (remove-controller (controller [:event-a])))))
 
   (describe "remove-all-controllers"
-
-    (around [it]
-      [(reset! removed-handlers [])
-       (with-redefs [remove-event-handler #(swap! removed-handlers conj %&)]
-         (it))])
-
     (it "should stop listening to events for all controllers"
-      (bus-controller bus-a [:event-a])
-      (bus-controller bus-b [:event-b])
-      (remove-all-controllers)
-      (should-contain [[:controller :event-a]] @removed-handlers)
-      (should-contain [[:controller :event-b]] @removed-handlers))))
+      (controller [:event-a])
+      (controller [:event-b])
+
+      (should-invoke
+        remove-event-handler
+        {:with [[:controller :event-a]] :times 1}
+        {:with [[:controller :event-b]] :times 1}
+        (remove-all-controllers)))))

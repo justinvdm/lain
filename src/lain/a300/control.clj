@@ -7,7 +7,7 @@
 
 (defonce controllers (atom {}))
 
-(defn value-controller [bus event-type & {:keys [extent modifier]
+(defn bus-controller [bus event-type & {:keys [extent modifier]
                                           :or {extent [0 1]
                                                modifier identity}}]
   (let [interpolator (lin-interpolator [0 1] extent)

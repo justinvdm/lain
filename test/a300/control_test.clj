@@ -6,6 +6,7 @@
                                             reset-all-counters!]]
             [overtone.libs.event :refer [sync-event
                                          remove-event-handler]]
+            [lain.a300.play :refer [ctl-midi-player]]
             [lain.a300.control :refer :all]))
 
 (describe "control"
@@ -72,6 +73,18 @@
         (should-invoke
           ctl
           {:with [:synth-a :param-a 0.8]}
+          (sync-event
+            [:event-a]
+            {:value-f 0.8})))))
+
+  (describe "player-param-controller"
+    (describe "when the event is emitted"
+      (it "should control the node's param"
+        (player-param-controller :player-a :param-a [:event-a])
+
+        (should-invoke
+          ctl-midi-player
+          {:with [:player-a :param-a 0.8]}
           (sync-event
             [:event-a]
             {:value-f 0.8})))))

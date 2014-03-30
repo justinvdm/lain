@@ -4,17 +4,19 @@
             [overtone.libs.counters :refer [next-id]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
-            [lain.utils :refer [lin-interpolator]]))
+            [lain.utils :refer [lin-interpolator]]
+            [lain.a300.play :refer [ctl-midi-player]]))
 
 (defonce controllers (atom {}))
 
 
-(defn controller [event-type & {:keys [controller-fn
-                                       extent
-                                       modifier]
-                                :or {controller-fn (fn [_] ())
-                                     extent [0 1]
-                                     modifier identity}}]
+(defn controller [event-type
+                  & {:keys [controller-fn
+                            extent
+                            modifier]
+                     :or {controller-fn (fn [_] ())
+                          extent [0 1]
+                          modifier identity}}]
   (let [interpolator (lin-interpolator [0 1] extent)
         event-key (concat [:controller] event-type)
         controller-id (next-id :controller)
@@ -34,22 +36,45 @@
     controller-id))
 
 
-(defn bus-controller [bus event-type & {:keys [extent modifier]
-                                          :or {extent [0 1]
-                                               modifier identity}}]
+(defn bus-controller [bus
+                      event-type
+                      & {:keys [extent modifier]
+                         :or {extent [0 1]
+                              modifier identity}}]
   (controller event-type
-    :controller-fn (fn [value-f] (control-bus-set! bus value-f))
-    :extent extent
-    :modifier modifier))
-
-
-(defn param-controller [node-id param-key event-type & {:keys [extent modifier]
-                                                        :or {extent [0 1]
-                                                             modifier identity}}]
-  (controller event-type
-              :controller-fn (fn [value-f] (ctl node-id param-key value-f))
               :extent extent
-              :modifier modifier))
+              :modifier modifier
+
+              :controller-fn (fn [value-f] (control-bus-set! bus value-f))))
+
+
+(defn param-controller [node-id
+                        param-key
+                        event-type
+                        & {:keys [extent modifier]
+                           :or {extent [0 1]
+                                modifier identity}}]
+  (controller event-type
+              :extent extent
+              :modifier modifier
+
+              :controller-fn
+              (fn [value-f] (ctl node-id param-key value-f))))
+
+
+(defn player-param-controller [player-id
+                               param-key
+                               event-type
+                               & {:keys [extent modifier]
+                                  :or {extent [0 1]
+                                       modifier identity}}]
+  (controller event-type
+              :extent extent
+              :modifier modifier
+
+              :controller-fn
+              (fn [value-f]
+                (ctl-midi-player player-id param-key value-f))))
 
 
 (defn remove-controller [controller-id]

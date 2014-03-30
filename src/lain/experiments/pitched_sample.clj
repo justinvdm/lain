@@ -3,7 +3,7 @@
             [lain.a300.events :refer [handle-a300-events]]
             [lain.a300.play :refer [midi-key-player
                                     remove-all-midi-players]]
-            [lain.a300.control :refer [value-controller
+            [lain.a300.control :refer [bus-controller
                                        remove-all-controllers]]
             [lain.insts :refer [key-inst]]
             [lain.utils :refer [deflcgen]]))
@@ -38,9 +38,9 @@
 (comment
   (handle-a300-events)
 
-  (value-controller !window-size-bus [:midi :r1])
-  (value-controller !window-rand-ratio-bus [:midi :r2])
-  (value-controller !overlaps-bus [:midi :r3] :extent [0 8])
+  (bus-controller !window-size-bus [:midi :r1])
+  (bus-controller !window-rand-ratio-bus [:midi :r2])
+  (bus-controller !overlaps-bus [:midi :r3] :extent [0 8])
 
   (midi-key-player glock :device-name "VirMIDI [default]")
   ())

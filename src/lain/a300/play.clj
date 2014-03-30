@@ -25,10 +25,10 @@
                                         channel]
                                  :or {down-event [:midi :key :down]
                                       up-event [:midi :key :up]
-                                      down (fn [e] ())
-                                      up (fn [e v] ())
+                                      down (fn [& _] ())
+                                      up (fn [& _] ())
                                       setup identity
-                                      teardown (fn [p] ())
+                                      teardown (fn [& _] ())
                                       device-name nil
                                       channel nil}}]
   (let [down-event-key
@@ -38,6 +38,9 @@
         (concat [player-key] up-event)
 
         notes
+        (atom {})
+
+        params
         (atom {})
 
         match
@@ -55,7 +58,7 @@
         (let [{note :note} e]
           (when (and (match e)
                      (not (contains? @notes note)))
-            (swap! notes assoc note (down e)))))
+            (swap! notes assoc note (down e (-> @params vec flatten))))))
       down-event-key)
 
     (on-event
@@ -115,10 +118,11 @@
 
       :down
       (fn [{note :note
-            velocity-f :velocity-f}]
-        (let [play-args (concat (bend-note note @bend-offset)
-                                [:velocity-f velocity-f])]
-          (apply player-fn play-args)))
+            velocity-f :velocity-f}
+           params]
+        (apply player-fn (concat (bend-note note @bend-offset)
+                                 [:velocity-f velocity-f]
+                                 params)))
 
       :up
       (fn [e node-id]
@@ -133,7 +137,7 @@
     (reset! (:bend-offset player) bend-offset)
     (doseq
       [[note node-id] @(:notes player)] 
-      (apply ctl (concat [node-id] (bend-note bend-offset note))))))
+      (apply ctl node-id (-> (bend-note bend-offset note) vec flatten)))))
 
 
 (defn midi-buf-player [player-fn bufs & {:keys [down-event
@@ -150,11 +154,13 @@
 
     :down
     (fn [{note :note
-          velocity-f :velocity-f}]
+          velocity-f :velocity-f}
+         params]
       (when-let [buf (get bufs note)]
-        (player-fn
-          :buf buf
-          :velocity-f velocity-f)))))
+        (apply player-fn
+               :buf buf
+               :velocity-f velocity-f
+               params)))))
 
 
 (defn midi-perc-player [player-fns & {:keys [down-event
@@ -171,17 +177,20 @@
 
     :down
     (fn [{note :note
-          velocity-f :velocity-f}]
+          velocity-f :velocity-f}
+         params]
       (when-let [player-fn (get player-fns note)]
-        (player-fn :velocity-f velocity-f)))))
+        (apply player-fn
+               :velocity-f velocity-f
+               params)))))
 
 
 (defn midi-mono-player [player-fn & {:keys [down-event
-                                           up-event
-                                           device-name]
-                                    :or {down-event [:midi :key :down]
-                                         up-event [:midi :key :up]
-                                         device-name nil}}]
+                                            up-event
+                                            device-name]
+                                     :or {down-event [:midi :key :down]
+                                          up-event [:midi :key :up]
+                                          device-name nil}}]
   (let [node-id (atom nil)]
     (midi-player
       :midi-mono-player
@@ -191,14 +200,16 @@
 
       :down
       (fn [{note :note
-            velocity-f :velocity-f}]
-        (let [play-args [:note note
-                         :freq (midi->hz note)
-                         :velocity-f velocity-f
-                         :gate 1]]
+            velocity-f :velocity-f}
+           params]
+        (let [params (concat [:note note
+                              :freq (midi->hz note)
+                              :velocity-f velocity-f
+                              :gate 1]
+                             params)]
           (if (node-active? @node-id)
-            (apply ctl (cons @node-id play-args))
-            (reset! node-id (apply player-fn play-args)))))
+            (apply ctl @node-id params))
+          (reset! node-id (apply player-fn params))))
 
       :up
       (fn [e _]

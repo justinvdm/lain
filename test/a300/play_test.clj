@@ -36,11 +36,13 @@
            :velocity-f 0.5})
 
         (should-have-invoked :down {:with [{:note 60
-                                            :velocity-f 0.5}]
+                                            :velocity-f 0.5}
+                                           []]
                                     :times 1})
 
         (should-have-invoked :down {:with [{:note 61
-                                            :velocity-f 0.5}]
+                                            :velocity-f 0.5}
+                                           []]
                                     :times 1}))
 
       (it "should not handle the event if the key is already pressed"
@@ -263,7 +265,7 @@
   (describe "when a key is released"
     (it "should zeroize the gate of the player function for that note"
       (midi-key-player
-        (stub :play {:invoke (fn [_ _ _ _ _ _] (next-id :fake-node))}))
+        (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
 
       (with-redefs [node-active? (stub :node-active? {:return true})]
         (should-invoke
@@ -287,7 +289,7 @@
 
     (it "should not zeroize the gate of the note is inactive"
       (midi-key-player
-        (stub :play {:invoke (fn [_ _ _ _ _ _] (next-id :fake-node))}))
+        (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
 
       (with-redefs [node-active? (stub :node-active? {:return false})]
         (should-not-invoke
@@ -309,7 +311,7 @@
 
   (describe "bend-midi-keys"
     (it "should bend the key player's active notes"
-      (let [play (stub :play {:invoke (fn [_ _ _ _ _ _] (next-id :fake-node))})
+      (let [play (stub :play {:invoke (fn [& _] (next-id :fake-node))})
             player-id (midi-key-player play)]
 
         (sync-event
@@ -405,7 +407,7 @@
     (describe "when a key is pressed"
       (it "should control the active node if the node is active"
         (midi-mono-player
-          (stub :play {:invoke (fn [_ _ _ _ _ _ _ _] (next-id :fake-node))}))
+          (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
 
         (sync-event
               [:midi :key :down]
@@ -429,7 +431,7 @@
     (describe "when a key is released"
       (it "should zeroize the gate if it the node is active"
         (midi-mono-player
-          (stub :play {:invoke (fn [_ _ _ _ _ _ _ _] (next-id :fake-node))}))
+          (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
 
         (sync-event
           [:midi :key :down]
@@ -448,7 +450,7 @@
 
       (it "should not zeroize the gate of the node is inactive"
         (midi-mono-player
-          (stub :play {:invoke (fn [_ _ _ _ _ _ _ _] (next-id :fake-node))}))
+          (stub :play {:invoke (fn [& _] (next-id :fake-node))}))
 
         (with-redefs [node-active? (stub :node-active? {:return false})]
           (sync-event

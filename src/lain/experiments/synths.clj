@@ -1,7 +1,8 @@
 (ns lain.experiments.synths
   (:require [overtone.core :refer :all]
             [lain.a300.events :refer [handle-a300-events]]
-            [lain.a300.play :refer [key-player
+            [lain.a300.play :refer [players
+                                    key-player
                                     remove-all-players]]
             [lain.a300.control :refer [player-param-controller
                                        remove-all-controllers]]
@@ -131,10 +132,37 @@
         sig (/ (* sig (+ 1 k)) (+ 1 (* k (abs sig))))]
     sig))
 
+(deflcgen space-verb :ar
+  [sig 0
+   predelay-t 0.48
+   combs-count 6
+   combs-t-min 0.01
+   combs-t-max 0.1
+   combs-decay 5
+   allpass-count 4
+   allpass-t-min 0.01
+   allpass-t-max 0.05
+   allpass-decay 1]
+  (let [predelay (delay-n sig predelay-t predelay-t)
+        comb (comb-l predelay
+                     combs-t-max
+                     (ranged-rand combs-t-min combs-t-max)
+                     combs-decay)
+        sig (mix (repeat combs-count comb))
+        sig (loop [n allpass-count
+                   res sig]
+              (if (<= n 0)
+                res
+                (recur (dec n)
+                       (allpass-n res
+                                  allpass-t-max
+                                  [(ranged-rand allpass-t-min allpass-t-max)
+                                   (ranged-rand allpass-t-min allpass-t-max)]
+                                  allpass-decay))))]
+    sig))
 
 (definst evil-tower
-  [bus 0
-   freq 440
+  [freq 440
    a 1
    d 2
    s 2
@@ -156,15 +184,37 @@
         snd (pan2 snd)]
     snd))
 
+(definst drony-sin
+  [freq 440
+   a 0.01
+   d 0.3
+   s 1
+   r 1
+   gate 1
+   phase-mod-freq 0.87
+   phase-mod-depth 7.32
+   amp-mod-freq 9.29
+   amp-mod-depth 9.37]
+  (let [phase-mod (* phase-mod-depth (sin-osc phase-mod-freq))
+        amp-mod (* amp-mod-depth (lf-noise1 amp-mod-freq))
+        sig (sin-osc freq phase-mod)
+        sig (+ sig (chorus sig))
+        sig (* amp-mod sig)
+        env (env-gen (adsr a d s r) gate :action FREE)
+        snd (* env sig 0.1)
+        snd (pan2 snd)]
+    snd))
 
 (do
   (handle-a300-events)
-  (def p (key-player evil-tower :device-name "VirMIDI [default]"))
+  (def p (key-player df :device-name "VirMIDI [default]"))
   (doseq [[param event-type extent]
-          [[:lpf-cutoff [:midi :r1] [440 8000]]
-           [:lpf-rq [:midi :r2] [0.0001 1]]
-           [:distortion-amount [:midi :r3] [0.01 1]]]]
+          [[:phase-mod-freq [:midi :r1] [0.01 10]]
+           [:phase-mod-depth [:midi :r2] [0.01 10]]
+           [:amp-mod-freq [:midi :r3] [0.01 10]]
+           [:amp-mod-depth [:midi :r4] [0.01 10]]]]
     (player-param-controller p param event-type :extent extent))
+  (-> (get @players 1) :params deref println)
   ())
 
 (do

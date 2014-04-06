@@ -9,6 +9,10 @@
             [lain.utils :refer [deflcgen]]))
 
 
+(def !minimoog-buf (load-sample "samples/minimoog/c1.wav"))
+(def !glock-buf (load-sample "samples/glock1/c1.wav"))
+
+
 (deflcgen detuned-saw :ar
   [freq 440
    offset 1]
@@ -205,16 +209,107 @@
         snd (pan2 snd)]
     snd))
 
+
+(deflcgen detuned-sin :ar
+  [freq 440
+   offset 1]
+  (let [sigs (sin-osc [(- freq offset) freq (+ freq offset)])
+        sig (mix sigs)
+        sig (pan2 sig)]
+    sig))
+
+
+(deflcgen kw :ar
+  [freq 440
+   offset 1]
+  (let [freqs [(- freq offset) freq (+ freq offset)]
+        freqs (concat (* 2 freqs) freqs)
+        sigs (sin-osc freqs)
+        sig (mix sigs)
+        sig (pan2 sig)]
+    sig))
+
+
+(definst mecha
+  [freq 440
+   a 0.01
+   d 0.3
+   s 1
+   r 2
+   gate 1
+   detune-offset 3.7
+   fb-coef 0.9995
+   leak-coef 0.995]
+  (let [sig (detuned-saw freq detune-offset)
+        sig (space-verb sig :predelay-t 0)
+        fb (leak-dc (* fb-coef (local-in)) leak-coef)
+        env (env-gen (adsr a d s r) gate :action FREE)
+        snd (* env sig 0.1)
+        snd (pan2 snd)]
+    (local-out snd)
+    snd))
+
+
+(definst ant
+  [freq 440
+   a 0.01
+   d 0.3
+   s 1
+   r 2
+   gate 1
+   detune-offset 3.7
+   lpf-cutoff 440
+   lpf-rq 1]
+  (let [sig (detuned-square freq detune-offset)
+        sig (rlpf sig lpf-cutoff lpf-rq)
+        env (env-gen (adsr a d s r) gate :action FREE)
+        snd (* env sig 0.1)
+        snd (pan2 snd)]
+    snd))
+
+
+(defsynth feedback
+  [bus 0
+   fb-coef 0.995
+   leak-coef 0.995]
+  (let [snd (in 0)
+        fb (leak-dc (* fb-coef (local-in)) leak-coef)
+        snd (+ snd fb)]
+    (local-out snd)
+    (out 0 (pan2 snd))))
+
+
+(definst granular-test
+  [freq 440
+   a 0.01
+   d 0.3
+   s 1
+   r 1
+   gate 1
+   grain-dur 1.49
+   grain-amp 15.0
+   grain-center 0.1
+   base-freq (midi->hz 60)]
+  (let [sig (t-grains :rate (/ freq base-freq)
+                      :bufnum !glock-buf
+                      :trigger 1
+                      :dur grain-dur
+                      :amp grain-amp
+                      :center-pos grain-center)
+        env (env-gen (adsr a d s r) gate :action FREE)
+        snd (* env sig 0.1)
+        snd (pan2 snd)]
+    snd))
+
+
 (do
   (handle-a300-events)
-  (def p (key-player df :device-name "VirMIDI [default]"))
+  (def p (key-player granular-test :device-name "VirMIDI [default]"))
   (doseq [[param event-type extent]
-          [[:phase-mod-freq [:midi :r1] [0.01 10]]
-           [:phase-mod-depth [:midi :r2] [0.01 10]]
-           [:amp-mod-freq [:midi :r3] [0.01 10]]
-           [:amp-mod-depth [:midi :r4] [0.01 10]]]]
+          [[:grain-dur [:midi :r1] [0.1 3]]
+           [:grain-amp [:midi :r2] [0.1 10]]
+           [:grain-center [:midi :r4] [0.1 3]]]]
     (player-param-controller p param event-type :extent extent))
-  (-> (get @players 1) :params deref println)
   ())
 
 (do

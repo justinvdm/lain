@@ -1,10 +1,12 @@
 (ns lain.utils
-  (:require [clojure.string :refer [join]]
+  (:require [clojure.string :refer [join split]]
             [overtone.libs.counters :refer [next-id]]
+            [overtone.music.pitch :refer [note]]
             [overtone.studio.inst :refer [inst]]
             [overtone.sc.synth :refer [synth-form]]
+            [overtone.sc.buffer :refer [buffer-info]]
             [overtone.sc.defcgen :refer [defcgen]]
-            [overtone.sc.sample :refer [load-sample]]))
+            [overtone.sc.sample :refer [load-sample load-samples]]))
 
 (defn lin-interpolator
   [[x1 x2]
@@ -54,3 +56,10 @@
      params (for [[p-name, p-val] params] [p-name {:default p-val}])
      params (vec (flatten params))]
     `(defcgen ~cgen-name "" ~params (~rate ~@body))))
+
+
+(defn load-note-samples [& glob]
+  (let [bufs (apply load-samples glob)]
+    (into {} (for
+               [buf bufs]
+               [(-> (split (:name buf) #"\.") first note) buf]))))

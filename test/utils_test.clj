@@ -1,9 +1,10 @@
 (ns lain.utils-test
-  (:require
-    [speclj.core :refer :all]
-    [lain.utils :refer :all]))
+  (:require [speclj.core :refer :all]
+            [overtone.sc.sample :refer [load-samples]]
+            [lain.utils :refer :all]))
 
 (describe "utils"
+  (with-stubs)
 
   (describe "lin-interpolator"
 
@@ -71,4 +72,16 @@
           (let [switch (make-switcher)]
             (switch 0)
             (switch 0)
-            (should= @record ["0:start"])))))))
+            (should= @record ["0:start"]))))))
+
+  (describe "load-note-samples"
+    (it "should load the samples keyed by midi notes"
+      (with-redefs [load-samples
+                    (stub :load-samples {:return [{:name "c1.wav"}
+                                                  {:name "c2.wav"}]})]
+        (should= (load-note-samples "c1.wav" "c2.wav")
+          {24 {:name "c1.wav"}
+           36 {:name "c2.wav"}}))
+
+        (should-have-invoked :load-samples {:times 1
+                                            :with ["c1.wav" "c2.wav"]}))))

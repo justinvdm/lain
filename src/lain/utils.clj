@@ -59,7 +59,13 @@
 
 
 (defn load-note-samples [& glob]
-  (let [bufs (apply load-samples glob)]
-    (into {} (for
-               [buf bufs]
-               [(-> (split (:name buf) #"\.") first note) buf]))))
+  (let [bufs (apply load-samples glob)
+        bufs (for [buf bufs]
+               (let [note-name (:name buf)
+                     note-name (first (split note-name #"\."))
+                     note-name (if (re-matches #"^[0-9]+$" note-name)
+                                 (read-string note-name)
+                                 note-name)
+                     note-name (note note-name)]
+                 [note-name buf]))]
+    (into {} bufs)))

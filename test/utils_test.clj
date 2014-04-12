@@ -84,4 +84,12 @@
            36 {:name "c2.wav"}}))
 
         (should-have-invoked :load-samples {:times 1
-                                            :with ["c1.wav" "c2.wav"]}))))
+                                            :with ["c1.wav" "c2.wav"]})))
+
+    (it "should support files named by midi notes"
+      (with-redefs [load-samples
+                    (stub :load-samples {:return [{:name "60.wav"}
+                                                  {:name "61.wav"}]})]
+        (should= (load-note-samples "c1.wav" "c2.wav")
+          {60 {:name "60.wav"}
+           61 {:name "61.wav"}}))))

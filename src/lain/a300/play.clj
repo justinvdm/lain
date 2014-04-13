@@ -171,7 +171,12 @@
         (apply player-fn
                :buf buf
                :velocity-f velocity-f
-               params)))))
+               params)))
+
+      :up
+      (fn [e node-id]
+        (if (node-active? node-id)
+          (ctl node-id :gate 0)))))
 
 
 (defn perc-player [player-fns & {:keys [down-event

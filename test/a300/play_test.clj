@@ -362,7 +362,7 @@
           (sync-event
             [:midi :key :up]
             {:note 61
-             :velocity-f 0.5})))))
+             :velocity-f 0.5}))))))
 
   (describe "bend-midi-keys"
     (it "should bend the key player's active notes"
@@ -435,7 +435,33 @@
                                   :times 1})
       (should-have-invoked :play {:with [:buf :buf-3
                                          :velocity-f 0.5]
-                                  :times 1})))))
+                                  :times 1})))
+
+  (describe "when the up event is emitted"
+    (it "should zeroize the gate of the player function for that note"
+      (buf-player
+        (stub :play {:invoke next-fake-node}) {2 :buf-2
+                                               3 :buf-3})
+
+      (with-redefs [node-active? (stub :node-active? {:return true})]
+        (should-invoke
+          ctl
+          {:with [1 :gate 0]
+           :times 1}
+          (sync-event
+            [:midi :pad :down]
+            {:note 2
+             :velocity-f 0.6})
+
+          (sync-event
+            [:midi :pad :down]
+            {:note 3
+             :velocity-f 0.5})
+
+          (sync-event
+            [:midi :pad :up]
+            {:note 3
+             :velocity-f 0.5}))))))
 
 (describe "perc-player"
   (describe "when the down event is emitted"

@@ -154,8 +154,8 @@
 (defn buf-player [player-fn bufs & {:keys [down-event
                                            up-event
                                            device-name]
-                                    :or {down-event [:midi :pad :down]
-                                         up-event [:midi :pad :up]
+                                    :or {down-event [:midi :key :down]
+                                         up-event [:midi :key :up]
                                          device-name nil}}]
   (player
     :buf-player

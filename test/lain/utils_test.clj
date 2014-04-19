@@ -64,6 +64,14 @@
                             "0:end"
                             "1:start"])))
 
+      (it "should clamp given mode number between 0 and the mode count"
+        (let [switch (make-switcher)]
+          (switch -1.3)
+          (switch 8.3)
+          (should= @record ["0:start"
+                            "0:end"
+                            "3:start"])))
+
       (describe "when a different mode from the current is requested"
         (it "stop the current mode, then start the new one"
           (let [switch (make-switcher)]

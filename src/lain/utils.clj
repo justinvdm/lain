@@ -30,7 +30,9 @@
     [modes (format-modes modes)
      mode-key (atom nil)]
     (fn [new-mode-key]
-      (let [new-mode-key (int new-mode-key)]
+      (let [new-mode-key (int new-mode-key)
+            new-mode-key (min new-mode-key (- (count modes) 1))
+            new-mode-key (max new-mode-key 0)]
         (when-not (= @mode-key new-mode-key)
           (when-let [old-mode-key @mode-key]
             ((:end (get modes old-mode-key))))

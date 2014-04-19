@@ -4,7 +4,8 @@
             [overtone.libs.counters :refer [next-id]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
-            [lain.utils :refer [lin-interpolator]]
+            [lain.utils :refer [lin-interpolator
+                                mode-switcher]]
             [lain.a300.play :refer [ctl-player]]))
 
 (defonce controllers (atom {}))
@@ -75,6 +76,13 @@
               :controller-fn
               (fn [value-f]
                 (ctl-player player-id param-key value-f))))
+
+
+(defn mode-controller [event-type modes]
+  (let [n (count modes)
+        switcher (mode-switcher modes)]
+    (controller event-type
+                :controller-fn #(switcher (* % n)))))
 
 
 (defn remove-controller [controller-id]

@@ -89,6 +89,48 @@
             [:event-a]
             {:value-f 0.8})))))
 
+  (describe "mode-controller"
+    (describe "when the event is emitted"
+      (it "should switch the mode"
+        (let [record (atom [])
+              modes {0 {:start #(swap! record conj "0:start")
+                        :end   #(swap! record conj "0:end")}
+
+                     1 {:start #(swap! record conj "1:start")
+                        :end   #(swap! record conj "1:end")}}]
+
+          (mode-controller [:event-a] modes)
+
+          (sync-event
+            [:event-a]
+            {:value-f 0.1})
+
+          (sync-event
+            [:event-a]
+            {:value-f 0.3})
+
+          (sync-event
+            [:event-a]
+            {:value-f 0.4})
+
+          (sync-event
+            [:event-a]
+            {:value-f 0.5})
+
+          (sync-event
+            [:event-a]
+            {:value-f 0.8})
+
+          (sync-event
+            [:event-a]
+            {:value-f 0.2})
+
+          (should= ["0:start"
+                    "0:end"
+                    "1:start"
+                    "1:end"
+                    "0:start"] @record)))))
+
   (describe "remove-controller"
     (it "should stop listening to the event associated with the controller"
       (should-invoke

@@ -56,9 +56,15 @@
                           "1:start"])))
     
     (describe "the returned switching function"
+      (it "should convert the given mode number to an int"
+        (let [switch (make-switcher)]
+          (switch 0.3)
+          (switch 1.2)
+          (should= @record ["0:start"
+                            "0:end"
+                            "1:start"])))
 
       (describe "when a different mode from the current is requested"
-
         (it "stop the current mode, then start the new one"
           (let [switch (make-switcher)]
             (switch 0)

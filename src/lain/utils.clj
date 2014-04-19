@@ -30,12 +30,13 @@
     [modes (format-modes modes)
      mode-key (atom nil)]
     (fn [new-mode-key]
-      (when-not (= @mode-key new-mode-key)
-        (when-let [old-mode-key @mode-key]
-          ((:end (get modes old-mode-key))))
-        (reset! mode-key new-mode-key)
-        (when new-mode-key
-          ((:start (get modes new-mode-key))))))))
+      (let [new-mode-key (int new-mode-key)]
+        (when-not (= @mode-key new-mode-key)
+          (when-let [old-mode-key @mode-key]
+            ((:end (get modes old-mode-key))))
+          (reset! mode-key new-mode-key)
+          (when new-mode-key
+            ((:start (get modes new-mode-key)))))))))
 
 (defmacro anon-inst
   "Workaround to declare an anonymous inst with params

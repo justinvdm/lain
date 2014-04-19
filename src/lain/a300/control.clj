@@ -78,11 +78,14 @@
                 (ctl-player player-id param-key value-f))))
 
 
-(defn mode-controller [event-type modes]
+(defn mode-controller [event-type modes & {:keys [first-mode]
+                                           :or {first-mode 0}}]
   (let [n (count modes)
         switcher (mode-switcher modes)]
     (controller event-type
-                :controller-fn #(switcher (* % n)))))
+                :controller-fn #(switcher (* % n)))
+    (if-not (nil? first-mode)
+      (switcher first-mode))))
 
 
 (defn remove-controller [controller-id]

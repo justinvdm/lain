@@ -4,98 +4,92 @@
             [overtone.libs.counters :refer [next-id]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
+            [mecha.core :refer [defmecha]]
             [lain.utils :refer [lin-interpolator
                                 mode-switcher]]
             [lain.a300.play :refer [ctl-player]]))
 
-(defonce controllers (atom {}))
+
+(defmecha controller [event-type
+                      & [controller-fn (fn [_])
+                         extent [0 1]
+                         modifier identity]]
+
+  (:start [interpolator (lin-interpolator [0 1] extent)
+           event-key (concat [:controller] event-type)
+           controller-id (next-id :controller)]
+
+          (on-event
+            event-type
+            (fn [{value-f :value-f}]
+              (let
+                [value (interpolator value-f)
+                 value (modifier value)]
+                (controller-fn value)))
+            event-key))
+
+  (:stop (remove-event-handler event-key)))
 
 
-(defn controller [event-type
-                  & {:keys [controller-fn
-                            extent
-                            modifier]
-                     :or {controller-fn (fn [_] ())
-                          extent [0 1]
-                          modifier identity}}]
-  (let [interpolator (lin-interpolator [0 1] extent)
-        event-key (concat [:controller] event-type)
-        controller-id (next-id :controller)
-        controller-data {:event-key event-key}]
+(defmecha bus-controller [event-type
+                          bus
+                          & [extent [0 1]
+                             modifier identity]]
 
-    (on-event
-      event-type
-      (fn
-        [{value-f :value-f}]
-        (let
-          [value (interpolator value-f)
-           value (modifier value)]
-          (controller-fn value)))
-      event-key)
-
-    (swap! controllers assoc controller-id controller-data)
-    controller-id))
+  (:start [super
+           (controller
+             event-type
+             :extent extent
+             :modifier modifier
+             :controller-fn
+             (fn [value-f] (control-bus-set! bus value-f)))]))
 
 
-(defn bus-controller [bus
-                      event-type
-                      & {:keys [extent modifier]
-                         :or {extent [0 1]
-                              modifier identity}}]
-  (controller event-type
-              :extent extent
-              :modifier modifier
+(defmecha param-controller [event-type
+                            node-id
+                            param-key
+                            & [extent [0 1]
+                               modifier identity]]
 
-              :controller-fn (fn [value-f] (control-bus-set! bus value-f))))
-
-
-(defn param-controller [node-id
-                        param-key
-                        event-type
-                        & {:keys [extent modifier]
-                           :or {extent [0 1]
-                                modifier identity}}]
-  (controller event-type
-              :extent extent
-              :modifier modifier
-
-              :controller-fn
-              (fn [value-f] (ctl node-id param-key value-f))))
+  (:start [super
+           (controller
+             event-type
+             :extent extent
+             :modifier modifier
+             :controller-fn
+             (fn [value-f] (ctl node-id param-key value-f)))]))
 
 
-(defn player-param-controller [player-id
-                               param-key
-                               event-type
-                               & {:keys [extent modifier]
-                                  :or {extent [0 1]
-                                       modifier identity}}]
-  (controller event-type
-              :extent extent
-              :modifier modifier
+(defmecha player-param-controller [event-type
+                                   player-id
+                                   param-key
+                                   & [extent [0 1]
+                                      modifier identity]]
 
-              :controller-fn
-              (fn [value-f]
-                (ctl-player player-id param-key value-f))))
-
-
-(defn mode-controller [event-type modes & {:keys [first-mode]
-                                           :or {first-mode 0}}]
-  (let [n (count modes)
-        switcher (mode-switcher modes)]
-    (controller event-type
-                :controller-fn #(switcher (* % n)))
-    (if-not (nil? first-mode)
-      (switcher first-mode))))
+  (:start [super
+           (controller
+             event-type
+             :extent extent
+             :modifier modifier
+             :controller-fn
+             (fn [value-f] (ctl-player player-id param-key value-f)))]))
 
 
-(defn remove-controller [controller-id]
-  (let
-    [{event-key :event-key} (get @controllers controller-id)]
-    (remove-event-handler event-key)
-    (swap! controllers dissoc controller-id)))
+(defmecha mode-controller [event-type
+                           modes
+                           & [first-mode 0
+                              extent [0 1]
+                              modifier identity]]
 
+  (:start [n (count modes)
+           switcher (mode-switcher modes)
 
-(defn remove-all-controllers []
-  (doseq
-    [[controller-id controller] @controllers] 
-    (remove-controller controller-id)))
+           super
+           (controller
+             event-type
+             :extent extent
+             :modifier modifier
+             :controller-fn #(switcher (* % n)))]
+
+          (if-not (nil? first-mode)
+            (switcher first-mode))))

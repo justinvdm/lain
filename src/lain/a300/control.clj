@@ -1,7 +1,6 @@
 (ns lain.a300.control
   (:require [overtone.sc.node :refer [ctl]]
             [overtone.sc.bus :refer [control-bus-set!]]
-            [overtone.libs.counters :refer [next-id]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
             [mecha.core :refer [defmecha]]
@@ -16,8 +15,7 @@
                          modifier identity]]
 
   (:start [interpolator (lin-interpolator [0 1] extent)
-           event-key (concat [:controller] event-type)
-           controller-id (next-id :controller)]
+           event-key (concat [:controller] event-type)]
 
           (on-event
             event-type
@@ -61,7 +59,7 @@
 
 
 (defmecha player-param-controller [event-type
-                                   player-id
+                                   player-instnc
                                    param-key
                                    & [extent [0 1]
                                       modifier identity]]
@@ -72,7 +70,7 @@
              :extent extent
              :modifier modifier
              :controller-fn
-             (fn [value-f] (ctl-player player-id param-key value-f)))]))
+             (fn [value-f] (ctl-player player-instnc param-key value-f)))]))
 
 
 (defmecha mode-controller [event-type

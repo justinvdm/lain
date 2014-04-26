@@ -17,7 +17,7 @@
 (defn bend-midi-keys [p bend-offset]
   (reset! (:bend-offset p) bend-offset)
   (doseq
-    [[note node-id] @(:notes p)] 
+    [[note node-id] @(:notes p)]
     (apply ctl node-id (-> (bend-note bend-offset note) vec flatten))))
 
 
@@ -69,40 +69,41 @@
                            (contains? @notes note))
                   (up e (get @notes note))
                   (swap! notes dissoc note))))
-            up-event-key))
+            up-event-key)
+
+          {:notes notes
+           :params params})
 
   (:stop (remove-event-handler down-event-key)
          (remove-event-handler up-event-key)))
 
 
 (defmecha key-player [player-fn & [down-event [:midi :key :down]
-                                    up-event [:midi :key :up]
-                                    device-name nil]]
+                                   up-event [:midi :key :up]
+                                   device-name nil]]
 
   (:start [bend-offset (atom 0)
 
            super
-           (player
-             :key-player
-             :device-name device-name
-             :down-event down-event
-             :up-event up-event
+          (player
+            :key-player
+            :device-name device-name
+            :down-event down-event
+            :up-event up-event
 
-             :down
-             (fn [{note :note
-                   velocity-f :velocity-f}
-                  params]
-               (apply player-fn (concat (bend-note note @bend-offset)
-                                        [:velocity-f velocity-f]
-                                        params)))
+            :down
+            (fn [{note :note
+                  velocity-f :velocity-f}
+                 params]
+              (apply player-fn (concat (bend-note note @bend-offset)
+                                       [:velocity-f velocity-f]
+                                       params)))
 
-             :up
-             (fn [e node-id]
-               (if (node-active? node-id)
-                 (ctl node-id :gate 0))))
-
-           notes (:notes super)
-           params (:params super)]))
+            :up
+            (fn [e node-id]
+              (if (node-active? node-id)
+                (ctl node-id :gate 0))))]
+          (assoc super :bend-offset bend-offset)))
 
 
 (defmecha buf-player [player-fn bufs & [down-event [:midi :key :down]
@@ -128,10 +129,8 @@
              :up
              (fn [e node-id]
                (if (node-active? node-id)
-                 (ctl node-id :gate 0))))
-
-           notes (:notes super)
-           params (:params super)]))
+                 (ctl node-id :gate 0))))]
+          super))
 
 
 (defmecha perc-player [player-fns & [down-event [:midi :pad :down]
@@ -151,10 +150,8 @@
                (when-let [player-fn (get player-fns note)]
                  (apply player-fn
                         :velocity-f velocity-f
-                        params))))
-
-           notes (:notes super)
-           params (:params super)]))
+                        params))))]
+          super))
 
 
 (defmecha mono-player [player-fn & [down-event [:midi :key :down]
@@ -162,30 +159,28 @@
                                     device-name nil]]
   (:start [node-id (atom nil)
 
-          super
-          (player
-            :mono-player
-            :device-name device-name
-            :down-event down-event
-            :up-event up-event
+           super
+           (player
+             :mono-player
+             :device-name device-name
+             :down-event down-event
+             :up-event up-event
 
-            :down
-            (fn [{note :note
-                  velocity-f :velocity-f}
-                 params]
-              (let [params (concat [:note note
-                                    :freq (midi->hz note)
-                                    :velocity-f velocity-f
-                                    :gate 1]
-                                   params)]
-                (if (node-active? @node-id)
-                  (apply ctl @node-id params))
-                (reset! node-id (apply player-fn params))))
+             :down
+             (fn [{note :note
+                   velocity-f :velocity-f}
+                  params]
+               (let [params (concat [:note note
+                                     :freq (midi->hz note)
+                                     :velocity-f velocity-f
+                                     :gate 1]
+                                    params)]
+                 (if (node-active? @node-id)
+                   (apply ctl @node-id params))
+                 (reset! node-id (apply player-fn params))))
 
-            :up
-            (fn [e _]
-              (if (node-active? @node-id)
-                (ctl @node-id :gate 0))))
-
-           notes (:notes super)
-           params (:params super)]))
+             :up
+             (fn [e _]
+               (if (node-active? @node-id)
+                 (ctl @node-id :gate 0))))]
+          super))

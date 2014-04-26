@@ -4,6 +4,7 @@
                                          on-event
                                          remove-event-handler]]))
 
+
 (def config
   {:channels {0 :key
               1 :b
@@ -14,12 +15,15 @@
               6 :bend
               7 :mod}})
 
+
 (defn- get-channel [n] (get (:channels config) n))
+
 
 (defn- key-event [e]
   (let [is-down (= (:command e) :note-on)
         direction (if is-down :down :up)]
     (event [:midi :key direction] e)))
+
 
 (defn- bend-event [e]
   (let [position (:velocity e)
@@ -30,11 +34,13 @@
       (assoc e :value value
                :value-f value-f))))
 
+
 (defn- mod-event [e]
   (event
     [:midi :mod]
     (assoc e :value (:velocity e)
              :value-f (:velocity-f e))))
+
 
 (defn- pad-event [e]
   (let [pad-num (:note e)
@@ -45,6 +51,7 @@
     (event [:midi :pad direction] e)
     (event [:midi pad-name direction] e)))
 
+
 (defn- get-control-name [e]
   (let [channel-num (:channel e)
         control-num (:note e)
@@ -54,17 +61,20 @@
         join
         keyword)))
 
+
 (defn- fuzzy-event [e]
   (event
     [:midi (get-control-name e)]
     (assoc e :value (:velocity e)
              :value-f (:velocity-f e))))
 
+
 (defn- toggle-event [e]
   (let [control-name (get-control-name e)
         is-on (= 127 (:velocity e))
         status (if is-on :on :off)]
     (event [:midi control-name status] e)))
+
 
 (def ^:private channel-handlers
   {:key key-event
@@ -76,17 +86,23 @@
    :r fuzzy-event
    :s fuzzy-event})
 
+
 (defn- handle-event [e]
   (let [channel (get-channel (:channel e))
         handler (get channel-handlers channel)]
   (handler e)))
+
 
 (defn handle-a300-events []
   (on-event [:midi :control-change] #(handle-event %) [:a300 :control-change])
   (on-event [:midi :note-on] #(handle-event %) [:a300 :note-on])
   (on-event [:midi :note-off] #(handle-event %) [:a300 :note-off]))
 
+
 (defn remove-a300-event-handlers []
   (remove-event-handler [:a300 :control-change])
   (remove-event-handler [:a300 :note-on])
   (remove-event-handler [:a300 :note-off]))
+
+
+(handle-a300-events)

@@ -1,5 +1,6 @@
 (ns lain.utils
   (:require [clojure.string :refer [join split]]
+            [clj-figlet.core :refer [render-to-string load-flf]]
             [overtone.libs.counters :refer [next-id]]
             [overtone.music.pitch :refer [note]]
             [overtone.studio.inst :refer [inst]]
@@ -7,6 +8,10 @@
             [overtone.sc.buffer :refer [buffer-info]]
             [overtone.sc.defcgen :refer [defcgen]]
             [overtone.sc.sample :refer [load-sample load-samples]]))
+
+
+(def flf-doom (load-flf "resources/doom.flf"))
+
 
 (defn lin-interpolator
   [[x1 x2]
@@ -48,3 +53,7 @@
                      note-name (note note-name)]
                  [note-name buf]))]
     (into {} bufs)))
+
+
+(defn ascii [s]
+  (println (render-to-string flf-doom s)))

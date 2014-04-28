@@ -1,11 +1,11 @@
-(ns lain.a300.control
+(ns lain.control
   (:require [overtone.sc.node :refer [ctl]]
             [overtone.sc.bus :refer [control-bus-set!]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
             [mecha.core :refer [defmecha switch]]
             [lain.utils :refer [lin-interpolator]]
-            [lain.a300.play :refer [ctl-player]]))
+            [lain.play :refer [ctl-player]]))
 
 
 (defmecha controller [event-type

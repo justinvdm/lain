@@ -1,11 +1,11 @@
-(ns lain.a300.control-test
+(ns lain.control-test
   (:require [speclj.core :refer :all]
             [overtone.sc.node :refer [ctl]]
             [overtone.sc.bus :refer [control-bus-set!]]
             [overtone.libs.event :refer [sync-event]]
             [mecha.core :refer [mecha switch stop]]
-            [lain.a300.play :refer [ctl-player]]
-            [lain.a300.control :refer :all]))
+            [lain.play :refer [ctl-player]]
+            [lain.control :refer :all]))
 
 (describe "control"
   (with-stubs)

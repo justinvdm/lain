@@ -1,4 +1,4 @@
-(ns lain.a300.play-test
+(ns lain.play-test
   (:require [speclj.core :refer :all]
             [overtone.sc.node :refer [ctl
                                       node-active?]]
@@ -8,7 +8,7 @@
                                             reset-all-counters!]]
             [overtone.music.pitch :refer [midi->hz]]
             [mecha.core :refer [stop]]
-            [lain.a300.play :refer :all]))
+            [lain.play :refer :all]))
 
 
 (defn next-fake-node [& _]

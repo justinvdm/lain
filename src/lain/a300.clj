@@ -1,4 +1,4 @@
-(ns lain.a300.events
+(ns lain.a300
   (:require [clojure.string :refer [join]]
             [overtone.libs.event :refer [event
                                          on-event

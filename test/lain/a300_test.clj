@@ -1,9 +1,9 @@
-(ns lain.a300.events-test
+(ns lain.a300-test
   (:require [speclj.core :refer :all]
             [overtone.libs.event :refer [sync-event
                                          on-sync-event
                                          remove-event-handler]]
-            [a300.events :refer :all]))
+            [lain.a300 :refer :all]))
 
 (defn fake-event
   [event-type

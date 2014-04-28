@@ -1,4 +1,4 @@
-(ns lain.a300.play
+(ns lain.play
   (:require [overtone.sc.node :refer [ctl
                                       node-active?]]
             [overtone.libs.event :refer [on-event

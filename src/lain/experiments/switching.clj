@@ -1,19 +1,17 @@
 (ns lain.experiments.switching
   (:require [clojure.string :refer [split]]
             [overtone.core :refer :all]
-            [lain.a300.events :refer [handle-a300-events]]
-            [lain.a300.play :refer [players
-                                    ctl-player
-                                    buf-player
-                                    remove-all-players]]
-            [lain.a300.control :refer [mode-controller
-                                       player-param-controller
-                                       remove-all-controllers]]
-            [lain.utils :refer [load-note-samples]]))
+            [mecha.core :as mecha :refer [defmecha]]
+            [lain.a300]
+            [lain.play :refer [ctl-player
+                               buf-player]]
+            [lain.control :refer [switch-controller
+                                  player-param-controller]]
+            [lain.utils :refer [load-note-samples ascii]]))
 
 
-(def !saw-bufs (load-note-samples "samples/saw1/*.wav"))
-(def !square-bufs (load-note-samples "samples/square1/*.wav"))
+(def !bufs {:saw (load-note-samples "samples/saw1/*.wav")
+            :square (load-note-samples "samples/square1/*.wav")})
 
 
 (defsynth ssynth
@@ -31,34 +29,19 @@
     (out bus snd)))
 
 
-(defn mode [mode-name bufs]
-  {:start
-   (fn []
-     (buf-player ssynth bufs :device-name "APRO [hw:2,0,1]")
-     (println "==============")
-     (println mode-name)
-     (println "==============")
-     (println ""))
-
-   :end
-   (fn []
-     (remove-all-players))})
+(defmecha saw-mode
+  (:start [p (buf-player ssynth (:saw !bufs) :device-name "APRO [hw:2,0,1]")]
+          (ascii "saw")))
 
 
-(def !modes {0 (mode "saw" !saw-bufs)
-             1 (mode "square" !square-bufs)})
+(defmecha square-mode
+  (:start [p (buf-player ssynth (:square !bufs) :device-name "APRO [hw:2,0,1]")]
+          (ascii "square")))
 
 
-(defn start []
-  (handle-a300-events)
-  (mode-controller [:midi :r9] !modes))
+(defmecha experiment
+  (:start [c-modes (switch-controller [:midi :r9] {0 saw-mode
+                                                   1 square-mode})]))
 
-
-(defn reset []
-  (remove-all-players)
-  (remove-all-controllers))
-
-
-(comment
-  (start)
-  (reset))
+(def e (experiment))
+(comment (mecha/stop e))

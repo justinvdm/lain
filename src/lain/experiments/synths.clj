@@ -1,15 +1,12 @@
 (ns lain.experiments.synths
   (:require [overtone.core :refer :all]
-            [lain.a300.events :refer [handle-a300-events]]
-            [lain.a300.play :refer [players
-                                    key-player
-                                    remove-all-players]]
-            [lain.a300.control :refer [player-param-controller
-                                       remove-all-controllers]]
+            [mecha.core :as mecha :refer [defmecha]]
+            [lain.a300]
+            [lain.play :refer [key-player]]
+            [lain.control :refer [player-param-controller]]
             [lain.utils :refer [deflcgen]]))
 
 
-(def !minimoog-buf (load-sample "samples/minimoog/c1.wav"))
 (def !glock-buf (load-sample "samples/glock1/c1.wav"))
 
 
@@ -302,17 +299,9 @@
     snd))
 
 
-(do
-  (handle-a300-events)
-  (def p (key-player granular-test :device-name "VirMIDI [default]"))
-  (doseq [[param event-type extent]
-          [[:grain-dur [:midi :r1] [0.1 3]]
-           [:grain-amp [:midi :r2] [0.1 10]]
-           [:grain-center [:midi :r4] [0.1 3]]]]
-    (player-param-controller p param event-type :extent extent))
-  ())
+(defmecha experiment
+  (:start [p (key-player drony-sin :device-name "APRO [hw:2,0,1]")]))
 
-(do
-  (remove-all-players)
-  (remove-all-controllers)
-  ())
+
+(def e (experiment))
+(comment (mecha/stop e))

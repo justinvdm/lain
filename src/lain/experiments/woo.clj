@@ -1,10 +1,8 @@
 (ns lain.experiments.woo
   (:require [overtone.core :refer :all]
-            [lain.a300.events :refer [handle-a300-events]]
-            [lain.a300.play :refer [mono-player
-                                    remove-all-players]]
-            [lain.a300.control :refer [value-controller
-                                       remove-all-controllers]]
+            [mecha.core :as mecha :refer [defmecha]]
+            [lain.a300]
+            [lain.play :refer [mono-player]]
             [lain.insts :refer [key-inst]]
             [lain.utils :refer [deflcgen]]))
 
@@ -25,18 +23,11 @@
      sig (pan2 sig)]
     sig))
 
-(comment
-  (handle-a300-events)
 
-  (mono-player
-    (key-inst woo (adsr :sustain 1
-                        :decay 3
-                        :release 8))
-    :device-name "VirMIDI [default]")
+(defmecha experiment
+  (:start [i (key-inst woo (adsr))
+           p (mono-player i :device-name "APRO [hw:2,0,1]")]))
 
-  (value-controller !window-size-bus [:midi :r1])
-  ())
 
-(comment
-  (remove-all-players)
-  ())
+(def e (experiment))
+(comment (mecha/stop e))

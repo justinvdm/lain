@@ -1,17 +1,16 @@
 (ns lain.experiments.rate-warping
   (:require [clojure.string :refer [split]]
             [overtone.core :refer :all]
-            [lain.a300.events :refer [handle-a300-events]]
-            [lain.a300.play :refer [players
-                                    buf-player
-                                    remove-all-players]]
-            [lain.a300.control :refer [param-controller
-                                       player-param-controller
-                                       remove-all-controllers]]
+            [mecha.core :as mecha :refer [defmecha]]
+            [lain.a300]
+            [lain.play :refer [buf-player]]
+            [lain.control :refer [param-controller
+                                  player-param-controller]]
             [lain.utils :refer [load-note-samples]]))
 
 
 (def !square-bufs (load-note-samples "samples/square1/*.wav"))
+
 
 (definst sinst
   [buf 0
@@ -32,20 +31,22 @@
     snd))
 
 
-(do
-  (handle-a300-events)
-  (def p (buf-player sinst
-                     !square-bufs
-                     :device-name "VirMIDI [hw:0,0,0]"
-                     :down-event [:midi :key :down]
-                     :up-event [:midi :key :up]))
-  (doseq [[param event-type extent]
-          [[:warp-depth [:midi :r1] [0.01 0.1]]
-           [:warp-freq [:midi :r2] [0 4]]]]
-    (player-param-controller p param event-type :extent extent))
-  ())
+(defmecha experiment
+  (:start
+    [p (buf-player sinst
+                   !square-bufs
+                   :device-name "APRO [hw:2,0,1]")
 
-(comment
-  (remove-all-players)
-  (remove-all-controllers)
-  ())
+     c-warp-depth (player-param-controller [:midi :r1]
+                                           p
+                                           :warp-depth
+                                           :extent [0.01 0.1])
+
+     c-warp-freq (player-param-controller [:midi :r2]
+                                          p
+                                          :warp-depth
+                                          :extent [0 0.4])]))
+
+
+(def e (experiment))
+(comment (mecha/stop e))

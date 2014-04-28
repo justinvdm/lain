@@ -3,7 +3,7 @@
             [overtone.sc.node :refer [ctl]]
             [overtone.sc.bus :refer [control-bus-set!]]
             [overtone.libs.event :refer [sync-event]]
-            [mecha.core :refer [stop]]
+            [mecha.core :refer [mecha switch stop]]
             [lain.a300.play :refer [ctl-player]]
             [lain.a300.control :refer :all]))
 
@@ -91,17 +91,15 @@
 
           (stop c)))))
 
-  (describe "mode-controller"
+  (describe "switch-controller"
     (describe "when the event is emitted"
       (it "should switch the mode"
-        (let [record (atom [])
-              modes {0 {:start #(swap! record conj "0:start")
-                        :end   #(swap! record conj "0:end")}
-
-                     1 {:start #(swap! record conj "1:start")
-                        :end   #(swap! record conj "1:end")}}
-              c (mode-controller [:event-a] modes)]
-
+        (let [switches (atom [])
+              mechas {0 (mecha (:start (swap! switches conj [0 :start]))
+                               (:stop (swap! switches conj [0 :stop])))
+                      1 (mecha (:start (swap! switches conj [1 :start]))
+                               (:stop (swap! switches conj [1 :stop])))}
+              c (switch-controller [:event-a] mechas)]
           (sync-event
             [:event-a]
             {:value-f 0.1})
@@ -126,10 +124,10 @@
             [:event-a]
             {:value-f 0.2})
 
-          (should= ["0:start"
-                    "0:end"
-                    "1:start"
-                    "1:end"
-                    "0:start"] @record)
+          (should= @switches [[0 :start]
+                              [0 :stop]
+                              [1 :start]
+                              [1 :stop]
+                              [0 :start]])
 
           (stop c))))))

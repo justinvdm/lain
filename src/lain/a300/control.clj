@@ -3,9 +3,8 @@
             [overtone.sc.bus :refer [control-bus-set!]]
             [overtone.libs.event :refer [on-event
                                          remove-event-handler]]
-            [mecha.core :refer [defmecha]]
-            [lain.utils :refer [lin-interpolator
-                                mode-switcher]]
+            [mecha.core :refer [defmecha switch]]
+            [lain.utils :refer [lin-interpolator]]
             [lain.a300.play :refer [ctl-player]]))
 
 
@@ -73,21 +72,23 @@
              (fn [value-f] (ctl-player player-instnc param-key value-f)))]))
 
 
-(defmecha mode-controller [event-type
-                           modes
-                           & [first-mode 0
-                              extent [0 1]
-                              modifier identity]]
+(defmecha switch-controller [event-type
+                             mechas
+                             & [initial 0
+                                extent [0 1]
+                                modifier identity]]
 
-  (:start [n (count modes)
-           switcher (mode-switcher modes)
+  (:start [n (count mechas)
+           switcher (switch mechas)
 
            super
            (controller
              event-type
              :extent extent
              :modifier modifier
-             :controller-fn #(switcher (* % n)))]
+             :controller-fn #(switcher (int (* % n))))]
 
-          (if-not (nil? first-mode)
-            (switcher first-mode))))
+          (if-not (nil? initial)
+            (switcher initial))
+
+          {:switcher switcher}))

@@ -4,7 +4,7 @@
   :license {:name "MIT"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [overtone "0.10-SNAPSHOT" :exclusions [org.clojure/clojure]]
-                 [mecha "0.4.1"]]
+                 [mecha "0.4.2"]]
   :profiles {:dev {:dependencies [[speclj "3.0.0"]]}}
   :plugins [[speclj "2.7.5"]]
   :test-paths ["test"]

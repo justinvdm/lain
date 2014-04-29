@@ -1,10 +1,14 @@
 (ns lain.utils
   (:require [clojure.string :refer [join split]]
             [clj-figlet.core :refer [render-to-string load-flf]]
+            [mecha.core :refer [defmecha]]
             [overtone.libs.counters :refer [next-id]]
             [overtone.music.pitch :refer [note]]
             [overtone.studio.inst :refer [inst]]
-            [overtone.sc.synth :refer [synth-form]]
+            [overtone.sc.node :refer [kill]]
+            [overtone.sc.bus :refer [control-bus free-bus]]
+            [overtone.sc.ugens :refer [out:kr impulse:kr]]
+            [overtone.sc.synth :refer [defsynth synth-form]]
             [overtone.sc.buffer :refer [buffer-info]]
             [overtone.sc.defcgen :refer [defcgen]]
             [overtone.sc.sample :refer [load-sample load-samples]]))
@@ -57,3 +61,33 @@
 
 (defn ascii [s]
   (println (render-to-string flf-doom s)))
+
+
+(defsynth metro-synth [bpm 120
+                       bpb 4
+                       res 4
+                       beat-bus 0
+                       bar-bus 1]
+  (let [bps (/ bpm 60)
+        beat-freq (/ res bps)
+        bar-freq (/ beat-freq bpb)]
+    (out:kr beat-bus (impulse:kr beat-freq))
+    (out:kr bar-bus (impulse:kr bar-freq))))
+
+
+(defmecha metro [& [bpm 120
+                    bpb 4
+                    res 4]]
+  (:start [busses {:beats (control-bus)
+                   :bars (control-bus)}
+           n (metro-synth :bpm bpm
+                          :bpb bpb
+                          :res res
+                          :beat-bus (:beats busses)
+                          :bar-bus (:bars busses))]
+          (merge busses {:node n
+                         :bpm bpm
+                         :bpb bpb
+                         :res res}))
+  (:stop (kill n)
+         (doseq [[k b] busses] (free-bus b))))

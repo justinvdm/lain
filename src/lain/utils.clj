@@ -68,8 +68,8 @@
                        res 4
                        beat-bus 0
                        bar-bus 1]
-  (let [bps (/ bpm 60)
-        beat-freq (/ res bps)
+  (let [quarters-ps (/ bpm 240)
+        beat-freq (* res quarters-ps)
         bar-freq (/ beat-freq bpb)]
     (out:kr beat-bus (impulse:kr beat-freq))
     (out:kr bar-bus (impulse:kr bar-freq))))

@@ -1,7 +1,7 @@
 (ns lain.experiments.metronome
   (:require [overtone.core :refer :all]
             [mecha.core :as mecha :refer [defmecha]]
-            [lain.utils :refer [metro]]))
+            [lain.sequencers :refer [metro]]))
 
 
 (definst click [bus 0

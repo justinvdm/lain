@@ -1,11 +1,14 @@
 (ns lain.sequencers-test
   (:require [speclj.core :refer :all]
-            [mecha.core :refer [stop]]
-            [overtone.sc.synth :refer [defsynth]]
+            [mecha.core :as mecha]
+            [overtone.sc.node :refer [kill]]
+            [overtone.sc.synth :refer [synth
+                                       defsynth]]
             [overtone.sc.ugens :refer [in:kr
                                        replace-out:kr
                                        pulse-count:kr]]
             [overtone.sc.bus :refer [control-bus
+                                     control-bus-get
                                      control-bus-set!]]
             [lain.utils :refer [deflcgen]]
             [lain.sequencers :refer :all]))
@@ -38,6 +41,67 @@
   (after (do (control-bus-set! bus-a 0)
              (control-bus-set! bus-b 0)
              (control-bus-set! bus-c 0)))
+
+  (describe "metro"
+    (it "should send beat pulses"
+      (let [m (metro :bpm (* 120 10)
+                     :bpb 4
+                     :res 4)
+            n ((synth (replace-out:kr bus-a (pulse-count:kr (in:kr (:beats m))))))]
+
+        (should= [0.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [1.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [2.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [3.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [4.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [5.0] (control-bus-get bus-a))
+
+        (mecha/stop m)
+        (kill n)))
+
+    (it "should send bar pulses"
+      (let [m (metro :bpm (* 120 20)
+                     :bpb 4
+                     :res 4)
+            n ((synth (replace-out:kr bus-a (pulse-count:kr (in:kr (:bars m))))))]
+
+        (should= [0.0] (control-bus-get bus-a))
+
+        (Thread/sleep 100)
+        (should= [1.0] (control-bus-get bus-a))
+
+        (Thread/sleep 100)
+        (should= [2.0] (control-bus-get bus-a))
+
+        (Thread/sleep 100)
+        (should= [3.0] (control-bus-get bus-a))
+
+        (Thread/sleep 100)
+        (should= [4.0] (control-bus-get bus-a))
+
+        (Thread/sleep 100)
+        (should= [5.0] (control-bus-get bus-a))
+
+        (mecha/stop m)))
+
+    (describe "when the metronome is stopped"
+      (it "should kill its synth node"
+        (let [m (metro)]
+          (should-invoke
+            kill
+            {:with [(:node m)]
+             :times 1}
+            (mecha/stop m))))))
   
   (describe "sq"
     (it "should normalize the sq"

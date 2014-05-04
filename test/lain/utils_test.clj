@@ -14,13 +14,8 @@
             [lain.utils :refer :all]))
 
 
-(def c (control-bus))
-
-
 (describe "utils"
   (with-stubs)
-
-  (after (control-bus-set! c 0))
 
   (describe "lin-interpolator"
       (it "should make a linear interpolator"
@@ -49,65 +44,4 @@
                                                   {:name "61.wav"}]})]
         (should= (load-note-samples "c1.wav" "c2.wav")
           {60 {:name "60.wav"}
-           61 {:name "61.wav"}}))))
-
-  (describe "metro"
-    (it "should send beat pulses"
-      (let [m (metro :bpm (* 120 10)
-                     :bpb 4
-                     :res 4)
-            n ((synth (replace-out:kr c (pulse-count:kr (in:kr (:beats m))))))]
-
-        (should= (control-bus-get c) [0.0])
-
-        (Thread/sleep 50)
-        (should= (control-bus-get c) [1.0])
-
-        (Thread/sleep 50)
-        (should= (control-bus-get c) [2.0])
-
-        (Thread/sleep 50)
-        (should= (control-bus-get c) [3.0])
-
-        (Thread/sleep 50)
-        (should= (control-bus-get c) [4.0])
-
-        (Thread/sleep 50)
-        (should= (control-bus-get c) [5.0])
-
-        (mecha/stop m)
-        (kill n)))
-
-    (it "should send bar pulses"
-      (let [m (metro :bpm (* 120 20)
-                     :bpb 4
-                     :res 4)
-            n ((synth (replace-out:kr c (pulse-count:kr (in:kr (:bars m))))))]
-
-        (should= (control-bus-get c) [0.0])
-
-        (Thread/sleep 100)
-        (should= (control-bus-get c) [1.0])
-
-        (Thread/sleep 100)
-        (should= (control-bus-get c) [2.0])
-
-        (Thread/sleep 100)
-        (should= (control-bus-get c) [3.0])
-
-        (Thread/sleep 100)
-        (should= (control-bus-get c) [4.0])
-
-        (Thread/sleep 100)
-        (should= (control-bus-get c) [5.0])
-
-        (mecha/stop m)))
-
-    (describe "when the metronome is stopped"
-      (it "should kill its synth node"
-        (let [m (metro)]
-          (should-invoke
-            kill
-            {:with [(:node m)]
-             :times 1}
-            (mecha/stop m)))))))
+           61 {:name "61.wav"}})))))

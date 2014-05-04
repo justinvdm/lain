@@ -5,6 +5,7 @@
             [overtone.sc.synth :refer [defsynth]]
             [overtone.sc.ugens :refer [in:kr
                                        out:kr
+                                       impulse:kr
                                        pulse-count:kr
                                        pulse-divider:kr
                                        buf-rd:kr
@@ -13,12 +14,41 @@
                                      control-bus]]
             [overtone.sc.buffer :refer [buffer
                                         buffer-free
-                                        buffer-write!]]
-            [lain.utils :refer [metro]]))
+                                        buffer-write!]]))
 
 
 (defonce default-res 4)
 (defonce normal-res 128)
+
+
+(defsynth metro-synth [bpm 120
+                       bpb 4
+                       res 4
+                       beat-bus 0
+                       bar-bus 1]
+  (let [quarters-ps (/ bpm 240)
+        beat-freq (* res quarters-ps)
+        bar-freq (/ beat-freq bpb)]
+    (out:kr beat-bus (impulse:kr beat-freq))
+    (out:kr bar-bus (impulse:kr bar-freq))))
+
+
+(defmecha metro [& [bpm 120
+                    bpb 4
+                    res 4]]
+  (:start [busses {:beats (control-bus)
+                   :bars (control-bus)}
+           n (metro-synth :bpm bpm
+                          :bpb bpb
+                          :res res
+                          :beat-bus (:beats busses)
+                          :bar-bus (:bars busses))]
+          (merge busses {:node n
+                         :bpm bpm
+                         :bpb bpb
+                         :res res}))
+  (:stop (kill n)
+         (doseq [[k b] busses] (free-bus b))))
 
 
 (defsynth trig-synth [buf 0

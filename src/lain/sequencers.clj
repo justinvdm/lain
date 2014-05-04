@@ -56,23 +56,6 @@
          (doseq [[k b] busses] (free-bus b))))
 
 
-(defsynth trig-synth [buf 0
-                      idx-bus 0
-                      trig-bus 1]
-  (out:kr trig-bus (buf-rd:kr 1 buf (in:kr idx-bus))))
-
-
-(defsynth idx-synth [idx-bus 0
-                     track-len 4
-                     beat-bus 1
-                     res 4]
-  (let [div (/ normal-res res)
-        p (pulse-divider:kr (in:kr beat-bus) div)
-        idx (pulse-count:kr p)
-        idx (mod idx track-len)]
-    (out:kr idx-bus idx)))
-
-
 (defn expand-steps [steps res]
   (let [fill-size (/ normal-res res)
         fill-size (- fill-size 1)
@@ -122,12 +105,30 @@
     s))
 
 
+(defsynth trig-synth [buf 0
+                      idx-bus 0
+                      trig-bus 1]
+  (out:kr trig-bus (buf-rd:kr 1 buf (in:kr idx-bus))))
+
+
+(defsynth idx-synth [idx-bus 0
+                     track-len 4
+                     step-bus 1]
+  (let [idx (pulse-count:kr (in:kr step-bus))
+        idx (mod idx track-len)]
+    (out:kr idx-bus idx)))
+
+
 (defmecha track-sequencer [syn steps idx-bus]
   (:start [buf (-> steps count buffer)
            trig-bus (control-bus)
-           _ (buffer-write! buf steps)
            trig-node (trig-synth buf idx-bus trig-bus)
-           syn-node (syn :trig trig-bus)])
+           syn-node (syn trig-bus)]
+           (buffer-write! buf steps)
+          {:buf buf
+           :trig trig-bus
+           :syn-node syn-node
+           :trig-node trig-node})
   (:stop (kill syn-node)
          (kill trig-node)
          (buffer-free buf)
@@ -141,9 +142,11 @@
            idx-bus (control-bus)
            idx-node (idx-synth idx-bus
                                (sq-len s)
-                               (:beats metronome)
-                               (:res metronome))
+                               (:steps metronome))
            tracks (for [[syn steps] s] (track-sequencer syn steps idx-bus))
-           tracks (doall tracks)])
+           tracks (vec tracks)]
+          {:tracks tracks
+           :idx idx-bus
+           :idx-node idx-node})
   (:stop (kill idx-node)
          (free-bus idx-bus)))

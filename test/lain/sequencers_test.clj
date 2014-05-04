@@ -17,7 +17,7 @@
 
 (deflcgen hit :kr [target 0
                    trig 0]
-  (replace-out:kr target (+ (in:kr target) (in:kr trig))))
+  (replace-out:kr target (pulse-count:kr (in:kr trig))))
 
 
 (def bus-a (control-bus))
@@ -156,8 +156,44 @@
       (should= (type sq-foo) :lain.sequencers/sq)))
 
   (describe "sequencer"
-    (it "should send beat triggers for each track")
-    (it "should allow a vector of sq to be given")
+    (it "should send beat triggers for each track"
+      (let [s (sq 4 {syn-a [0 1 1 0]
+                     syn-b [1 0 0 1]})
+            m (metro :bpm (* 120 4))
+            sr (sequencer s :metronome m)]
+
+        (should= [0.0] (control-bus-get bus-a))
+        (should= [0.0] (control-bus-get bus-b))
+
+        (Thread/sleep 125)
+        (should= [1.0] (control-bus-get bus-a))
+        (should= [0.0] (control-bus-get bus-b))
+
+        (Thread/sleep 125)
+        (should= [2.0] (control-bus-get bus-a))
+        (should= [0.0] (control-bus-get bus-b))
+
+        (Thread/sleep 125)
+        (should= [2.0] (control-bus-get bus-a))
+        (should= [1.0] (control-bus-get bus-b))
+
+        (Thread/sleep 125)
+        (should= [2.0] (control-bus-get bus-a))
+        (should= [2.0] (control-bus-get bus-b))
+
+        (Thread/sleep 125)
+        (should= [3.0] (control-bus-get bus-a))
+        (should= [2.0] (control-bus-get bus-b))
+
+        (Thread/sleep 125)
+        (should= [4.0] (control-bus-get bus-a))
+        (should= [2.0] (control-bus-get bus-b))
+
+        (Thread/sleep 125)
+        (should= [4.0] (control-bus-get bus-a))
+        (should= [3.0] (control-bus-get bus-b))
+
+        (mecha/stop sr)))
 
     (describe "when stopped"
       (it "should free its index bus")

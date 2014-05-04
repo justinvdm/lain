@@ -1,6 +1,7 @@
 (ns lain.sequencers-test
   (:require [speclj.core :refer :all]
             [mecha.core :as mecha]
+            [overtone.libs.event :refer [sync-event]]
             [overtone.sc.node :refer [kill]]
             [overtone.sc.synth :refer [synth
                                        defsynth]]
@@ -16,19 +17,19 @@
 
 (deflcgen hit :kr [target 0
                    trig 0]
-  (replace-out:kr target (pulse-count:kr (in:kr trig))))
+  (replace-out:kr target (+ (in:kr target) (in:kr trig))))
 
 
 (def bus-a (control-bus))
-(defsynth syn-a [trig 0] (hit bus-a))
+(defsynth syn-a [trig 0] (hit bus-a trig))
 
 
 (def bus-b (control-bus))
-(defsynth syn-b [trig 0] (hit bus-b))
+(defsynth syn-b [trig 0] (hit bus-b trig))
 
 
 (def bus-c (control-bus))
-(defsynth syn-c [trig 0] (hit bus-c))
+(defsynth syn-c [trig 0] (hit bus-c trig))
 
 
 (defsq sq-foo 4 {syn-a [0 1 1 0]
@@ -38,7 +39,8 @@
 (describe "sequencers"
   (with-stubs)
 
-  (after (do (control-bus-set! bus-a 0)
+  (after (do (sync-event :reset)
+             (control-bus-set! bus-a 0)
              (control-bus-set! bus-b 0)
              (control-bus-set! bus-c 0)))
 
@@ -66,8 +68,7 @@
         (Thread/sleep 50)
         (should= [5.0] (control-bus-get bus-a))
 
-        (mecha/stop m)
-        (kill n)))
+        (mecha/stop m)))
 
     (it "should send beat pulses"
       (let [m (metro :bpm (* 120 10)
@@ -92,8 +93,7 @@
         (Thread/sleep 50)
         (should= [5.0] (control-bus-get bus-a))
 
-        (mecha/stop m)
-        (kill n)))
+        (mecha/stop m)))
 
     (it "should send bar pulses"
       (let [m (metro :bpm (* 120 20)

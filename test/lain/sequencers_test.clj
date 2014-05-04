@@ -43,6 +43,32 @@
              (control-bus-set! bus-c 0)))
 
   (describe "metro"
+    (it "should send step pulses"
+      (let [m (metro :bpm (/ (* 120 10) 32)
+                     :bpb 4
+                     :res 4)
+            n ((synth (replace-out:kr bus-a (pulse-count:kr (in:kr (:steps m))))))]
+
+        (should= [0.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [1.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [2.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [3.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [4.0] (control-bus-get bus-a))
+
+        (Thread/sleep 50)
+        (should= [5.0] (control-bus-get bus-a))
+
+        (mecha/stop m)
+        (kill n)))
+
     (it "should send beat pulses"
       (let [m (metro :bpm (* 120 10)
                      :bpb 4

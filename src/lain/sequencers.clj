@@ -24,11 +24,14 @@
 (defsynth metro-synth [bpm 120
                        bpb 4
                        res 4
-                       beat-bus 0
-                       bar-bus 1]
-  (let [quarters-ps (/ bpm 240)
-        beat-freq (* res quarters-ps)
+                       step-bus 0
+                       beat-bus 1
+                       bar-bus 2]
+  (let [bpqs (/ bpm 240)
+        step-freq (* normal-res bpqs)
+        beat-freq (* res bpqs)
         bar-freq (/ beat-freq bpb)]
+    (out:kr step-bus (impulse:kr step-freq))
     (out:kr beat-bus (impulse:kr beat-freq))
     (out:kr bar-bus (impulse:kr bar-freq))))
 
@@ -36,11 +39,13 @@
 (defmecha metro [& [bpm 120
                     bpb 4
                     res 4]]
-  (:start [busses {:beats (control-bus)
+  (:start [busses {:steps (control-bus)
+                   :beats (control-bus)
                    :bars (control-bus)}
            n (metro-synth :bpm bpm
                           :bpb bpb
                           :res res
+                          :step-bus (:steps busses)
                           :beat-bus (:beats busses)
                           :bar-bus (:bars busses))]
           (merge busses {:node n

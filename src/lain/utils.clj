@@ -9,7 +9,6 @@
             [overtone.sc.bus :refer [control-bus free-bus]]
             [overtone.sc.ugens :refer [out:kr impulse:kr]]
             [overtone.sc.synth :refer [defsynth synth-form]]
-            [overtone.sc.buffer :refer [buffer-info]]
             [overtone.sc.defcgen :refer [defcgen]]
             [overtone.sc.sample :refer [load-sample load-samples]]))
 

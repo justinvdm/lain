@@ -135,10 +135,16 @@
                      syn-b [1 0 0 1]})]
         (with-redefs [normal-res 8]
           (should= {syn-a [0 0 1 0 1 0 0 0]
-                    syn-b [1 0 0 0 0 0 1 0]} (s))))))
+                    syn-b [1 0 0 0 0 0 1 0]} (s)))))
 
-  (describe "sq+"
-    (it "should construct a new sq that adds the given sq"
+    (it "should allow nested sqs"
+      (should=
+        ((sq {syn-a [0 1 1 0]
+              syn-b [1 0 0 1]}))
+        ((sq (sq {syn-a [0 1 1 0]
+                  syn-b [1 0 0 1]})))))
+
+    (it "should allow sequential collections of sqs"
       (let [s1 (sq 4 {syn-a [0 1 0 1]
                       syn-b [1 0 0 1]})
             s2 (sq 4 {syn-a [0 1 1 0]
@@ -149,7 +155,7 @@
           ((sq 8 {syn-a [0 0 1 0 0 0 1 0 0 0 1 0 1 0 0 0 1 0 1 0 1 0 1 0]
                   syn-b [1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 1 1 0 0 1]
                   syn-c [0 0 0 0 0 0 0 0 1 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0]}))
-          ((sq+ s1 s2 s3))))))
+          ((sq [s1 s2 s3]))))))
 
   (describe "defsq"
     (it "should define an sq"

@@ -64,22 +64,30 @@
     steps))
 
 
-(defn normalize-sq [s res]
-  (let [s (for [[syn steps] s] [syn (expand-steps steps res)])
-        s (into {} s)]
-    s))
+(defn eval-sq [s & {:keys [res]
+                    :or {res normal-res}}]
+  (cond
+    (= (type s) ::sq)
+    (eval-sq (s))
+
+    (sequential? s)
+    (eval-sq (reduce sq-add (map eval-sq s)))
+
+    (map? s)
+    (into {} (for [[syn steps] s] [syn (expand-steps steps res)]))))
 
 
-(defmacro sq [res & form]
-  `(let [result# (do ~@form)]
-     (with-meta
-       (fn [] (normalize-sq result# ~res))
-       {:type ::sq
-        :res ~res})))
+(defmacro sq [& form]
+  (let [[res form] (if (integer? (first form))
+                     [(first form) (rest form)]
+                     [normal-res form])]
+    `(with-meta
+       (fn [] (eval-sq (do ~@form) :res ~res))
+       {:type ::sq})))
 
 
-(defmacro defsq [sq-name res & form]
-  `(def ~sq-name (sq ~res ~@form)))
+(defmacro defsq [sq-name & form]
+  `(def ~sq-name (sq ~@form)))
 
 
 (defn sq-len [s]
@@ -97,12 +105,6 @@
         b (merge b (into {} fill-ab))
         a (merge-with concat a b)]
     a))
-
-
-(defn sq+ [& sqs]
-  (let [s (sq normal-res (let [sqs (for [s sqs] (s))]
-                           (reduce sq-add sqs)))]
-    s))
 
 
 (defsynth trig-synth [buf 0
@@ -136,8 +138,7 @@
 
 
 (defmecha sequencer [s & [metronome nil]]
-  (:start [s (if (vector? s) (apply sq+ s) s)
-           s (s)
+  (:start [s ((sq s))
            metronome (or metronome (metro))
            idx-bus (control-bus)
            idx-node (idx-synth idx-bus

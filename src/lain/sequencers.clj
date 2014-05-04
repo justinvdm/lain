@@ -7,7 +7,6 @@
                                        out:kr
                                        impulse:kr
                                        pulse-count:kr
-                                       pulse-divider:kr
                                        buf-rd:kr
                                        round-up]]
             [overtone.sc.bus :refer [free-bus
@@ -25,13 +24,16 @@
                        bpb 4
                        res 4
                        step-bus 0
+                       step-idx-bus 0
                        beat-bus 1
                        bar-bus 2]
   (let [bpqs (/ bpm 240)
         step-freq (* normal-res bpqs)
         beat-freq (* res bpqs)
-        bar-freq (/ beat-freq bpb)]
-    (out:kr step-bus (impulse:kr step-freq))
+        bar-freq (/ beat-freq bpb)
+        steps (impulse:kr step-freq)]
+    (out:kr step-bus steps)
+    (out:kr step-idx-bus (pulse-count:kr steps))
     (out:kr beat-bus (impulse:kr beat-freq))
     (out:kr bar-bus (impulse:kr bar-freq))))
 
@@ -40,12 +42,14 @@
                     bpb 4
                     res 4]]
   (:start [busses {:steps (control-bus)
+                   :step-idx (control-bus)
                    :beats (control-bus)
                    :bars (control-bus)}
            n (metro-synth :bpm bpm
                           :bpb bpb
                           :res res
                           :step-bus (:steps busses)
+                          :step-idx-bus (:step-idx busses)
                           :beat-bus (:beats busses)
                           :bar-bus (:bars busses))]
           (merge busses {:node n
@@ -62,6 +66,23 @@
         steps (for [s steps] (cons s (repeat fill-size 0)))
         steps (flatten steps)]
     steps))
+
+
+(defn sq-len [s]
+  (-> s first second count))
+
+
+(defn sq-add [a b]
+  (let [keys-a (-> a keys set)
+        keys-b (-> b keys set)
+        keys-diff-ab (difference keys-a keys-b)
+        keys-diff-ba (difference keys-b keys-a)
+        fill-ab (for [k keys-diff-ab] [k (repeat (sq-len b) 0)])
+        fill-ba (for [k keys-diff-ba] [k (repeat (sq-len a) 0)])
+        a (merge a (into {} fill-ba))
+        b (merge b (into {} fill-ab))
+        a (merge-with concat a b)]
+    a))
 
 
 (defn eval-sq [s & {:keys [res]
@@ -90,35 +111,10 @@
   `(def ~sq-name (sq ~@form)))
 
 
-(defn sq-len [s]
-  (-> s first second count))
-
-
-(defn sq-add [a b]
-  (let [keys-a (-> a keys set)
-        keys-b (-> b keys set)
-        keys-diff-ab (difference keys-a keys-b)
-        keys-diff-ba (difference keys-b keys-a)
-        fill-ab (for [k keys-diff-ab] [k (repeat (sq-len b) 0)])
-        fill-ba (for [k keys-diff-ba] [k (repeat (sq-len a) 0)])
-        a (merge a (into {} fill-ba))
-        b (merge b (into {} fill-ab))
-        a (merge-with concat a b)]
-    a))
-
-
 (defsynth trig-synth [buf 0
                       idx-bus 0
                       trig-bus 1]
   (out:kr trig-bus (buf-rd:kr 1 buf (in:kr idx-bus))))
-
-
-(defsynth idx-synth [idx-bus 0
-                     track-len 4
-                     step-bus 1]
-  (let [idx (pulse-count:kr (in:kr step-bus))
-        idx (mod idx track-len)]
-    (out:kr idx-bus idx)))
 
 
 (defmecha track-sequencer [syn steps idx-bus]
@@ -140,14 +136,7 @@
 (defmecha sequencer [s & [metronome nil]]
   (:start [s ((sq s))
            metronome (or metronome (metro))
-           idx-bus (control-bus)
-           idx-node (idx-synth idx-bus
-                               (sq-len s)
-                               (:steps metronome))
+           idx-bus (:step-idx metronome)
            tracks (for [[syn steps] s] (track-sequencer syn steps idx-bus))
            tracks (vec tracks)]
-          {:tracks tracks
-           :idx idx-bus
-           :idx-node idx-node})
-  (:stop (kill idx-node)
-         (free-bus idx-bus)))
+          {:tracks tracks}))

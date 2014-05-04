@@ -46,27 +46,55 @@
 
   (describe "metro"
     (it "should send step pulses"
-      (let [m (metro :bpm (/ (* 120 10) 32)
+      (let [m (metro :bpm (/ (* 120 4) 32)
                      :bpb 4
                      :res 4)
             n ((synth (replace-out:kr bus-a (pulse-count:kr (in:kr (:steps m))))))]
 
         (should= [0.0] (control-bus-get bus-a))
 
-        (Thread/sleep 50)
+        (Thread/sleep 125)
         (should= [1.0] (control-bus-get bus-a))
 
-        (Thread/sleep 50)
+        (Thread/sleep 125)
         (should= [2.0] (control-bus-get bus-a))
 
-        (Thread/sleep 50)
+        (Thread/sleep 125)
         (should= [3.0] (control-bus-get bus-a))
 
-        (Thread/sleep 50)
+        (Thread/sleep 125)
         (should= [4.0] (control-bus-get bus-a))
 
-        (Thread/sleep 50)
+        (Thread/sleep 125)
         (should= [5.0] (control-bus-get bus-a))
+
+        (mecha/stop m)))
+
+    (it "should keep track of the step index"
+      (let [m (metro :bpm (/ (* 120 4) 32)
+                     :bpb 4
+                     :res 4)
+            n ((synth (replace-out:kr bus-a (in:kr (:step-idx m)))))]
+
+        (should= [0.0] (control-bus-get bus-a))
+
+        (Thread/sleep 10)
+        (should= [1.0] (control-bus-get bus-a))
+
+        (Thread/sleep 125)
+        (should= [2.0] (control-bus-get bus-a))
+
+        (Thread/sleep 125)
+        (should= [3.0] (control-bus-get bus-a))
+
+        (Thread/sleep 125)
+        (should= [4.0] (control-bus-get bus-a))
+
+        (Thread/sleep 125)
+        (should= [5.0] (control-bus-get bus-a))
+
+        (Thread/sleep 125)
+        (should= [6.0] (control-bus-get bus-a))
 
         (mecha/stop m)))
 
@@ -199,11 +227,4 @@
         (should= [4.0] (control-bus-get bus-a))
         (should= [3.0] (control-bus-get bus-b))
 
-        (mecha/stop sr)))
-
-    (describe "when stopped"
-      (it "should free its index bus")
-      (it "should kill its index synth node")
-      (it "should kill its track trigger nodes")
-      (it "should free its track trigger busses")
-      (it "should free its track buffers"))))
+        (mecha/stop sr)))))

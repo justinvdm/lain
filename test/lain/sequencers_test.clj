@@ -189,37 +189,37 @@
     (it "should send beat triggers for each track"
       (let [s (sq 4 {syn-a [0 1 1 0]
                      syn-b [1 0 0 1]})
-            m (metro :bpm (* 120 4))
+            m (metro :bpm (* 120 2))
             sr (sequencer s :metronome m)]
 
         (should= [0.0] (control-bus-get bus-a))
         (should= [0.0] (control-bus-get bus-b))
 
-        (Thread/sleep 125)
+        (Thread/sleep 250)
         (should= [1.0] (control-bus-get bus-a))
         (should= [0.0] (control-bus-get bus-b))
 
-        (Thread/sleep 125)
+        (Thread/sleep 250)
         (should= [2.0] (control-bus-get bus-a))
         (should= [0.0] (control-bus-get bus-b))
 
-        (Thread/sleep 125)
+        (Thread/sleep 250)
         (should= [2.0] (control-bus-get bus-a))
         (should= [1.0] (control-bus-get bus-b))
 
-        (Thread/sleep 125)
+        (Thread/sleep 250)
         (should= [2.0] (control-bus-get bus-a))
         (should= [2.0] (control-bus-get bus-b))
 
-        (Thread/sleep 125)
+        (Thread/sleep 250)
         (should= [3.0] (control-bus-get bus-a))
         (should= [2.0] (control-bus-get bus-b))
 
-        (Thread/sleep 125)
+        (Thread/sleep 250)
         (should= [4.0] (control-bus-get bus-a))
         (should= [2.0] (control-bus-get bus-b))
 
-        (Thread/sleep 125)
+        (Thread/sleep 250)
         (should= [4.0] (control-bus-get bus-a))
         (should= [3.0] (control-bus-get bus-b))
 

@@ -11,6 +11,7 @@
             [overtone.sc.bus :refer [control-bus
                                      control-bus-get
                                      control-bus-set!]]
+            [lain.test-init]
             [lain.utils :refer [deflcgen]]
             [lain.sequencers :refer :all]))
 

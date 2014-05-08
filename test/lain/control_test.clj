@@ -4,6 +4,7 @@
             [overtone.sc.bus :refer [control-bus-set!]]
             [overtone.libs.event :refer [sync-event]]
             [mecha.core :refer [mecha switch stop]]
+            [lain.test-init]
             [lain.play :refer [ctl-player]]
             [lain.control :refer :all]))
 

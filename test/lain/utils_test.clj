@@ -11,6 +11,7 @@
                                      control-bus
                                      control-bus-get
                                      control-bus-set!]]
+            [lain.test-init]
             [lain.utils :refer :all]))
 
 

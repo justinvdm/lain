@@ -3,6 +3,7 @@
             [overtone.libs.event :refer [sync-event
                                          on-sync-event
                                          remove-event-handler]]
+            [lain.test-init]
             [lain.a300 :refer :all]))
 
 (defn fake-event

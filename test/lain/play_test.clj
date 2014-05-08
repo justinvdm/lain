@@ -8,6 +8,7 @@
                                             reset-all-counters!]]
             [overtone.music.pitch :refer [midi->hz]]
             [mecha.core :refer [stop]]
+            [lain.test-init]
             [lain.play :refer :all]))
 
 

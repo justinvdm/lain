@@ -1,9 +1,9 @@
 (ns lain.control-test
   (:require [speclj.core :refer :all]
-            [overtone.sc.node :refer [ctl]]
-            [overtone.sc.bus :refer [control-bus-set!]]
-            [overtone.libs.event :refer [sync-event]]
-            [mecha.core :refer [mecha switch stop]]
+            [overtone.sc.node :refer :all]
+            [overtone.sc.bus :refer :all]
+            [overtone.libs.event :refer :all]
+            [mecha.core :as mecha :refer [mecha switch]]
             [lain.test-init]
             [lain.play :refer [ctl-player]]
             [lain.control :refer :all]))
@@ -23,7 +23,7 @@
 
           (should-have-invoked :controller-fn {:with [0.8]
                                                :times 1})
-          (stop c)))
+          (mecha/stop c)))
 
       (it "should map the event's value to the given extent"
         (let [c (controller [:event-a]
@@ -36,7 +36,7 @@
 
           (should-have-invoked :controller-fn {:with [80.0]
                                                :times 1})
-          (stop c)))
+          (mecha/stop c)))
 
       (it "should pass the value through the given modifier function"
         (let [c (controller [:event-a]
@@ -48,7 +48,7 @@
 
           (should-have-invoked :controller-fn {:with [1.8]
                                                :times 1})
-          (stop c)))))
+          (mecha/stop c)))))
 
   (describe "bus-controller"
     (describe "when the event is emitted"
@@ -62,7 +62,7 @@
               [:event-a]
               {:value-f 0.8}))
 
-          (stop c)))))
+          (mecha/stop c)))))
 
   (describe "param-controller"
     (describe "when the event is emitted"
@@ -76,7 +76,7 @@
               [:event-a]
               {:value-f 0.8}))
           
-          (stop c)))))
+          (mecha/stop c)))))
 
   (describe "player-param-controller"
     (describe "when the event is emitted"
@@ -90,7 +90,7 @@
               [:event-a]
               {:value-f 0.8}))
 
-          (stop c)))))
+          (mecha/stop c)))))
 
   (describe "switch-controller"
     (describe "when the event is emitted"
@@ -131,4 +131,4 @@
                               [1 :stop]
                               [0 :start]])
 
-          (stop c))))))
+          (mecha/stop c))))))

@@ -1,8 +1,7 @@
 (ns lain.control
-  (:require [overtone.sc.node :refer [ctl]]
-            [overtone.sc.bus :refer [control-bus-set!]]
-            [overtone.libs.event :refer [on-event
-                                         remove-event-handler]]
+  (:require [overtone.sc.node :refer :all]
+            [overtone.sc.bus :refer :all]
+            [overtone.libs.event :refer :all]
             [mecha.core :refer [defmecha switch]]
             [lain.utils :refer [lin-interpolator]]
             [lain.play :refer [ctl-player]]))

@@ -1,16 +1,11 @@
 (ns lain.utils-test
   (:require [speclj.core :refer :all]
             [mecha.core :as mecha]
-            [overtone.sc.node :refer [kill]]
-            [overtone.sc.synth :refer [synth]]
-            [overtone.sc.sample :refer [load-samples]]
-            [overtone.sc.ugens :refer [in:kr
-                                       replace-out:kr
-                                       pulse-count:kr]]
-            [overtone.sc.bus :refer [free-bus
-                                     control-bus
-                                     control-bus-get
-                                     control-bus-set!]]
+            [overtone.sc.node :refer :all]
+            [overtone.sc.synth :refer :all]
+            [overtone.sc.sample :refer :all]
+            [overtone.sc.ugens :refer :all]
+            [overtone.sc.bus :refer :all]
             [lain.test-init]
             [lain.utils :refer :all]))
 

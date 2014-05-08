@@ -1,8 +1,6 @@
 (ns lain.a300-test
   (:require [speclj.core :refer :all]
-            [overtone.libs.event :refer [sync-event
-                                         on-sync-event
-                                         remove-event-handler]]
+            [overtone.libs.event :refer :all]
             [lain.test-init]
             [lain.a300 :refer :all]))
 

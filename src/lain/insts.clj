@@ -1,8 +1,6 @@
 (ns lain.insts
-  (:require [overtone.sc.ugens :refer [FREE
-                                       env-gen
-                                       play-buf]]
-            [overtone.sc.cgens.buf-io :refer [scaled-play-buf]]
+  (:require [overtone.sc.ugens :refer :all]
+            [overtone.sc.cgens.buf-io :refer :all]
             [lain.utils :refer [anon-inst]]))
 
 (defn key-inst [wave env]

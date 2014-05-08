@@ -2,15 +2,10 @@
   (:require [speclj.core :refer :all]
             [mecha.core :as mecha]
             [overtone.libs.event :refer [sync-event]]
-            [overtone.sc.node :refer [kill]]
-            [overtone.sc.synth :refer [synth
-                                       defsynth]]
-            [overtone.sc.ugens :refer [in:kr
-                                       replace-out:kr
-                                       pulse-count:kr]]
-            [overtone.sc.bus :refer [control-bus
-                                     control-bus-get
-                                     control-bus-set!]]
+            [overtone.sc.node :refer :all]
+            [overtone.sc.synth :refer :all]
+            [overtone.sc.ugens :refer :all]
+            [overtone.sc.bus :refer :all]
             [lain.test-init]
             [lain.utils :refer [deflcgen]]
             [lain.sequencers :refer :all]))

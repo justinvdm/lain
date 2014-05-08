@@ -1,8 +1,6 @@
 (ns lain.a300
   (:require [clojure.string :refer [join]]
-            [overtone.libs.event :refer [event
-                                         on-event
-                                         remove-event-handler]]))
+            [overtone.libs.event :refer :all]))
 
 
 (def config

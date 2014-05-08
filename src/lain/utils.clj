@@ -1,12 +1,12 @@
 (ns lain.utils
   (:require [clojure.string :refer [join split]]
             [clj-figlet.core :refer [render-to-string load-flf]]
-            [overtone.libs.counters :refer [next-id]]
-            [overtone.music.pitch :refer [note]]
-            [overtone.studio.inst :refer [inst]]
-            [overtone.sc.synth :refer [synth-form]]
-            [overtone.sc.defcgen :refer [defcgen]]
-            [overtone.sc.sample :refer [load-sample load-samples]]))
+            [overtone.libs.counters :refer :all]
+            [overtone.music.pitch :refer :all]
+            [overtone.studio.inst :refer :all]
+            [overtone.sc.synth :refer :all]
+            [overtone.sc.defcgen :refer :all]
+            [overtone.sc.sample :refer :all]))
 
 
 (def flf-doom (load-flf "resources/doom.flf"))

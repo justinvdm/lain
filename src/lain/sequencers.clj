@@ -1,19 +1,11 @@
 (ns lain.sequencers
   (:require [clojure.set :refer [difference]]
             [mecha.core :refer [defmecha]]
-            [overtone.sc.node :refer [kill]]
-            [overtone.sc.synth :refer [defsynth]]
-            [overtone.sc.ugens :refer [in:kr
-                                       out:kr
-                                       impulse:kr
-                                       pulse-count:kr
-                                       buf-rd:kr
-                                       round-up]]
-            [overtone.sc.bus :refer [free-bus
-                                     control-bus]]
-            [overtone.sc.buffer :refer [buffer
-                                        buffer-free
-                                        buffer-write!]]))
+            [overtone.sc.node :refer :all]
+            [overtone.sc.synth :refer :all]
+            [overtone.sc.ugens :refer :all]
+            [overtone.sc.bus :refer :all]
+            [overtone.sc.buffer :refer :all]))
 
 
 (defonce default-res 4)

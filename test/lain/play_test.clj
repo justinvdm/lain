@@ -1,13 +1,10 @@
 (ns lain.play-test
   (:require [speclj.core :refer :all]
-            [overtone.sc.node :refer [ctl
-                                      node-active?]]
-            [overtone.libs.event :refer [sync-event
-                                         remove-event-handler]]
-            [overtone.libs.counters :refer [next-id
-                                            reset-all-counters!]]
-            [overtone.music.pitch :refer [midi->hz]]
-            [mecha.core :refer [stop]]
+            [overtone.sc.node :refer :all]
+            [overtone.libs.event :refer :all]
+            [overtone.libs.counters :refer :all]
+            [overtone.music.pitch :refer :all]
+            [mecha.core :as mecha]
             [lain.test-init]
             [lain.play :refer :all]))
 
@@ -49,7 +46,7 @@
 
           (bend-midi-keys p 2))
 
-        (stop p)))
+        (mecha/stop p)))
 
     (it "should bend new notes played by the key player"
       (let [p (key-player (stub :play))]
@@ -74,7 +71,7 @@
                                            :velocity-f 0.5]
                                     :times 1})
 
-        (stop p))))
+        (mecha/stop p))))
 
 
   (describe "ctl-player"
@@ -102,7 +99,7 @@
              :times 0}
             (ctl-player p :foo 23)))
 
-        (stop p)))
+        (mecha/stop p)))
 
     (it "should use the given params for newly played notes"
       (let [p (player :test-player
@@ -129,7 +126,7 @@
                                            [:foo 23]]
                                     :times 1})
 
-        (stop p))))
+        (mecha/stop p))))
 
 (describe "player"
   (describe "when a key is pressed"
@@ -155,7 +152,7 @@
                                             :velocity-f 0.5}
                                            []]
                                     :times 1})
-        (stop p)))
+        (mecha/stop p)))
 
     (it "should not handle the event if the key is already pressed"
       (let [p (player :test-player :down (stub :down))]
@@ -172,7 +169,7 @@
 
         (should-have-invoked :down {:times 1})
 
-        (stop p)))
+        (mecha/stop p)))
 
     (it "should not handle the event if the key belongs to another device"
       (let [p (player :test-player
@@ -193,7 +190,7 @@
 
         (should-have-invoked :down {:times 1})
 
-        (stop p)))
+        (mecha/stop p)))
 
     (it "should not handle the event if the key belongs to another channel"
       (let [p (player :test-player
@@ -214,7 +211,7 @@
 
         (should-have-invoked :down {:times 1})
 
-        (stop p))))
+        (mecha/stop p))))
 
   (describe "when a key is released"
     (it "should handle the event"
@@ -243,7 +240,7 @@
                                          true]
                                   :times 1})
 
-        (stop p)))
+        (mecha/stop p)))
 
     (it "should ignore the event if no corresponding down event has happened"
       (let [p (player :test-player :up (stub :up))]
@@ -265,7 +262,7 @@
 
         (should-have-invoked :up {:times 1})
 
-        (stop p)))
+        (mecha/stop p)))
 
     (it "should ignore the event if it belongs to another device"
       (let [p (player
@@ -299,7 +296,7 @@
 
         (should-have-invoked :up {:times 1})
 
-        (stop p)))
+        (mecha/stop p)))
 
     (it "should ignore the event if it belongs to another channel"
       (let [p (player
@@ -333,7 +330,7 @@
 
         (should-have-invoked :up {:times 1})
 
-        (stop p)))))
+        (mecha/stop p)))))
 
 (describe "key-player"
   (describe "when a key is pressed"
@@ -360,7 +357,7 @@
                                            :velocity-f 0.5]
                                     :times 1})
 
-        (stop p))))
+        (mecha/stop p))))
 
   (describe "when a key is released"
     (it "should zeroize the gate of the player function for that note"
@@ -387,7 +384,7 @@
                :velocity-f 0.5}))
 
 
-          (stop p)))))
+          (mecha/stop p)))))
 
   (it "should not zeroize the gate of the note is inactive"
     (let [p (key-player (stub :play {:invoke next-fake-node}))]
@@ -410,7 +407,7 @@
             {:note 61
              :velocity-f 0.5}))
 
-        (stop p)))))
+        (mecha/stop p)))))
 
 (describe "buf-player"
   (describe "when the down event is emitted"
@@ -435,7 +432,7 @@
                                            :velocity-f 0.5]
                                     :times 1})
 
-        (stop p))))
+        (mecha/stop p))))
 
   (describe "when the up event is emitted"
     (it "should zeroize the gate of the player function for that note"
@@ -462,7 +459,7 @@
               {:note 3
                :velocity-f 0.5})))
 
-        (stop p)))))
+        (mecha/stop p)))))
 
 (describe "perc-player"
   (describe "when the down event is emitted"
@@ -485,7 +482,7 @@
         (should-have-invoked :play-3 {:with [:velocity-f 0.5]
                                       :times 1})
 
-        (stop p)))))
+        (mecha/stop p)))))
 
 (describe "mono-player"
   (describe "when a key is pressed"
@@ -511,7 +508,7 @@
               {:note 61
                :velocity-f 0.5})))
 
-        (stop p))))
+        (mecha/stop p))))
 
   (describe "when a key is released"
     (it "should zeroize the gate if it the node is active"
@@ -532,7 +529,7 @@
               {:note 60
                :velocity-f 0.5})))
 
-        (stop p)))
+        (mecha/stop p)))
 
     (it "should not zeroize the gate of the node is inactive"
       (let [p (mono-player (stub :play {:invoke next-fake-node}))]
@@ -550,4 +547,4 @@
               {:note 60
                :velocity-f 0.5})))
 
-        (stop p))))))
+        (mecha/stop p))))))

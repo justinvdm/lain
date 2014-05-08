@@ -1,10 +1,8 @@
 (ns lain.play
-  (:require [overtone.sc.node :refer [ctl
-                                      node-active?]]
-            [overtone.libs.event :refer [on-event
-                                         remove-event-handler]]
-            [overtone.music.pitch :refer [midi->hz]]
-            [overtone.sc.envelope :refer [perc]]
+  (:require [overtone.sc.node :refer :all]
+            [overtone.libs.event :refer :all]
+            [overtone.music.pitch :refer :all]
+            [overtone.sc.envelope :refer :all]
             [mecha.core :refer [defmecha]]))
 
 

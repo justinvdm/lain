@@ -3,7 +3,7 @@
             [overtone.libs.event :refer :all]
             [overtone.music.pitch :refer :all]
             [overtone.sc.envelope :refer :all]
-            [mecha.core :refer [defmecha]]))
+            [lain.mecha :refer [defmecha]]))
 
 
 (defn bend-note [note offset]

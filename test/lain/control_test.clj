@@ -3,9 +3,9 @@
             [overtone.sc.node :refer :all]
             [overtone.sc.bus :refer :all]
             [overtone.libs.event :refer :all]
-            [mecha.core :as mecha :refer [mecha switch]]
             [lain.test-init]
             [lain.play :refer [ctl-player]]
+            [lain.mecha :as mecha :refer [mecha switch]]
             [lain.control :refer :all]))
 
 (describe "control"

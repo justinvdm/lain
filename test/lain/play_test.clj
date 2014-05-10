@@ -4,9 +4,9 @@
             [overtone.libs.event :refer :all]
             [overtone.libs.counters :refer :all]
             [overtone.music.pitch :refer :all]
-            [mecha.core :as mecha]
             [lain.test-init]
-            [lain.play :refer :all]))
+            [lain.play :refer :all]
+            [lain.mecha :as mecha]))
 
 
 (defn next-fake-node [& _]

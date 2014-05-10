@@ -1,11 +1,11 @@
 (ns lain.sequencers
   (:require [clojure.set :refer [difference]]
-            [mecha.core :refer [defmecha]]
             [overtone.sc.node :refer :all]
             [overtone.sc.synth :refer :all]
             [overtone.sc.ugens :refer :all]
             [overtone.sc.bus :refer :all]
-            [overtone.sc.buffer :refer :all]))
+            [overtone.sc.buffer :refer :all]
+            [lain.mecha :refer [defmecha]]))
 
 
 (defonce default-res 4)
@@ -33,23 +33,25 @@
 (defmecha metro [& [bpm 120
                     bpb 4
                     res 4]]
-  (:start [busses {:steps (control-bus)
-                   :step-idx (control-bus)
-                   :beats (control-bus)
-                   :bars (control-bus)}
+  (:start [step-bus (control-bus)
+           step-idx-bus (control-bus)
+           beat-bus (control-bus)
+           bar-bus (control-bus)
            n (metro-synth :bpm bpm
                           :bpb bpb
                           :res res
-                          :step-bus (:steps busses)
-                          :step-idx-bus (:step-idx busses)
-                          :beat-bus (:beats busses)
-                          :bar-bus (:bars busses))]
-          (merge busses {:node n
-                         :bpm bpm
-                         :bpb bpb
-                         :res res}))
-  (:stop (kill n)
-         (doseq [[k b] busses] (free-bus b))))
+                          :step-bus step-bus
+                          :step-idx-bus step-idx-bus
+                          :beat-bus beat-bus
+                          :bar-bus bar-bus)]
+          {:steps step-bus
+           :step-idx step-idx-bus
+           :beats beat-bus
+           :bars bar-bus
+           :node n
+           :bpm bpm
+           :bpb bpb
+           :res res}))
 
 
 (defn expand-steps [steps res]
@@ -118,11 +120,7 @@
           {:buf buf
            :trig trig-bus
            :syn-node syn-node
-           :trig-node trig-node})
-  (:stop (kill syn-node)
-         (kill trig-node)
-         (buffer-free buf)
-         (free-bus trig-bus)))
+           :trig-node trig-node}))
 
 
 (defmecha sequencer [s & [metronome nil]]

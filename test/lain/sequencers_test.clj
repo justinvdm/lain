@@ -1,12 +1,12 @@
 (ns lain.sequencers-test
   (:require [speclj.core :refer :all]
-            [mecha.core :as mecha]
             [overtone.libs.event :refer [sync-event]]
             [overtone.sc.node :refer :all]
             [overtone.sc.synth :refer :all]
             [overtone.sc.ugens :refer :all]
             [overtone.sc.bus :refer :all]
             [lain.test-init]
+            [lain.mecha :as mecha]
             [lain.utils :refer [deflcgen]]
             [lain.sequencers :refer :all]))
 
@@ -142,16 +142,7 @@
         (Thread/sleep 100)
         (should= [5.0] (control-bus-get bus-a))
 
-        (mecha/stop m)))
-
-    (describe "when the metronome is stopped"
-      (it "should kill its synth node"
-        (let [m (metro)]
-          (should-invoke
-            kill
-            {:with [(:node m)]
-             :times 1}
-            (mecha/stop m))))))
+        (mecha/stop m))))
   
   (describe "sq"
     (it "should normalize the sq"

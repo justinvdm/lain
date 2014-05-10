@@ -2,9 +2,9 @@
   (:require [overtone.sc.node :refer :all]
             [overtone.sc.bus :refer :all]
             [overtone.libs.event :refer :all]
-            [mecha.core :refer [defmecha switch]]
             [lain.utils :refer [lin-interpolator]]
-            [lain.play :refer [ctl-player]]))
+            [lain.play :refer [ctl-player]]
+            [lain.mecha :refer [defmecha switch]]))
 
 
 (defmecha controller [event-type

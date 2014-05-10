@@ -1,6 +1,6 @@
 (ns lain.rp-test
   (:require [speclj.core :refer :all]
-            [mecha.core :as mecha]))
+            [lain.mecha :as mecha]))
 
 
 (describe "rp"

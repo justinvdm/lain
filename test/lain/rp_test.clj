@@ -151,4 +151,61 @@
         (free-bus in-bus)
         (free-bus out-bus)
         (free-bus sync-bus)
-        (mecha/stop t-rp)))))
+        (mecha/stop t-rp))))
+
+(describe "a300-looper"
+  (describe "when the down key is pressed in recording mode"
+    (it "should start recording"
+      (let [lp (a300-looper [:midi :l1 :down] [:midi :l2 :up])]
+        (sync-event [:midi :l9 :down])
+
+        (should-invoke
+          rp-mode
+          {:with [(:rp lp) :rec]
+           :times 1}
+          (sync-event [:midi :l1 :down]))
+
+        (mecha/stop lp))))
+
+  (describe "when the mode key is released in recording mode"
+    (it "should start playing"
+      (let [lp (a300-looper [:midi :l1 :down] [:midi :l2 :up])]
+        (sync-event [:midi :l9 :down])
+        (sync-event [:midi :l1 :down])
+
+        (should-invoke
+          rp-mode
+          {:with [(:rp lp) :play]
+           :times 1}
+          (sync-event [:midi :l9 :up]))
+
+        (mecha/stop lp))))
+
+  (describe "when the up key is pressed in play mode"
+    (it "should stop playing"
+      (let [lp (a300-looper [:midi :l1 :down] [:midi :l1 :up])]
+        (sync-event [:midi :l9 :down])
+        (sync-event [:midi :l1 :down])
+
+        (should-invoke
+          mecha/stop
+          {:with [(get-in lp [:rp :modes])]
+           :times 1}
+          (sync-event [:midi :l1 :up]))
+
+        (mecha/stop lp))))
+
+  (describe "when the down key is pressed in play mode"
+    (it "should start playing"
+      (let [lp (a300-looper [:midi :l1 :down] [:midi :l1 :up])]
+        (sync-event [:midi :l9 :down])
+        (sync-event [:midi :l1 :down])
+        (sync-event [:midi :l1 :up])
+
+        (should-invoke
+          rp-mode
+          {:with [(:rp lp) :play]
+           :times 1}
+          (sync-event [:midi :l1 :down]))
+
+        (mecha/stop lp))))))

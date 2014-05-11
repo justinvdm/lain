@@ -125,9 +125,69 @@
            modes (switch {:play play-mode
                           :rec rec-mode})]
           {:modes modes})
-  (:stop (-> @curr-rec :out-buf buffer-free)
-         (-> @curr-rec :timer-bus free-bus)))
+  (:stop (let [{out-buf :out-buf
+                timer-bus :timer-bus} @curr-rec]
+           (if (buffer-live? out-buf) (buffer-free out-buf))
+           (if-not (nil? timer-bus) (free-bus timer-bus)))))
 
 
 (defn rp-mode [t-rp mode-name]
   ((:modes t-rp) mode-name))
+
+
+(defmecha a300-looper [down-event
+                       up-event
+                       & [in-bus 0
+                          out-bus 0
+                          mode-down-event [:midi :l9 :on]
+                          mode-up-event [:midi :l9 :off]
+                          sync-bus -1
+                          looped true
+                          buf-size default-buffer-size]]
+
+  (:start [rp-key [::a300-looper (next-id :a300-looper)]
+           up-key (concat rp-key up-event)
+           down-key (concat rp-key down-event)
+           mode-down-key (concat rp-key mode-down-event)
+           mode-up-key (concat rp-key mode-up-event)
+           recording (atom false)
+           this-rp (rp :in-bus in-bus
+                       :out-bus out-bus
+                       :sync-bus sync-bus
+                       :looped looped
+                       :buf-size buf-size)]
+
+          (on-event
+            down-event
+            (fn [e]
+              (if @recording
+                (rp-mode this-rp :rec)
+                (rp-mode this-rp :play)))
+            down-key)
+
+          (on-event
+            up-event
+            (fn [e]
+              (mecha/stop (:modes this-rp)))
+            up-key)
+
+          (on-event
+            mode-down-event
+            (fn [e]
+              (reset! recording true))
+            mode-down-key)
+
+          (on-event
+            mode-up-event
+            (fn [e]
+              (when @recording
+                (rp-mode this-rp :play)
+                (reset! recording false)))
+            mode-up-key)
+
+          {:rp this-rp})
+
+  (:stop (remove-event-handler up-key)
+         (remove-event-handler down-key)
+         (remove-event-handler mode-down-key)
+         (remove-event-handler mode-up-key)))

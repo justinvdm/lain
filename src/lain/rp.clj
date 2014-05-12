@@ -127,8 +127,8 @@
           {:modes modes})
   (:stop (let [{out-buf :out-buf
                 timer-bus :timer-bus} @curr-rec]
-           (if (buffer-live? out-buf) (buffer-free out-buf))
-           (if-not (nil? timer-bus) (free-bus timer-bus)))))
+           (mecha/stop out-buf)
+           (mecha/stop timer-bus))))
 
 
 (defn rp-mode [t-rp mode-name]

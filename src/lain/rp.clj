@@ -48,10 +48,12 @@
 
 (defmecha rp-rec [& [in-bus 0
                      sync-bus -1
-                     buf-size default-buffer-size]]
+                     buf-size default-buffer-size
+                     target [:tail 0]]]
   (:start [!out-buf (buffer buf-size)
            !timer-bus (control-bus)
-           rec-node (syn-rec in-bus
+           rec-node (syn-rec target
+                             in-bus
                              !out-buf
                              !timer-bus
                              sync-bus)]
@@ -91,8 +93,10 @@
                         out-bus 0
                         timer-bus 1
                         sync-bus -1
-                        looped true]]
-  (:start [play-node (syn-play in-buf
+                        looped true
+                        target [:tail 0]]]
+  (:start [play-node (syn-play target
+                               in-buf
                                out-bus
                                timer-bus
                                sync-bus
@@ -107,11 +111,14 @@
                  buf-size default-buffer-size
                  attack 0.01
                  sustain 1
-                 release 1]]
+                 release 1
+                 player-target [:tail 0]
+                 rec-target [:tail 0]]]
   (:start [curr-rec (atom nil)
            rec-mode (mecha (:start [r (rp-rec :in-bus in-bus
                                               :sync-bus sync-bus
-                                              :buf-size buf-size)]
+                                              :buf-size buf-size
+                                              :target rec-target)]
                                    (reset! curr-rec r)
                                    r))
            play-mode (mecha (:start [p (if @curr-rec
@@ -119,7 +126,8 @@
                                                     :out-bus out-bus
                                                     :timer-bus (:timer-bus @curr-rec)
                                                     :sync-bus sync-bus
-                                                    :looped looped)
+                                                    :looped looped
+                                                    :target player-target)
                                          nil)]
                                     p))
            modes (switch {:play play-mode
@@ -143,7 +151,9 @@
                           mode-up-event [:midi :l9 :off]
                           sync-bus -1
                           looped true
-                          buf-size default-buffer-size]]
+                          buf-size default-buffer-size
+                          player-target [:tail 0]
+                          rec-target [:tail 0]]]
 
   (:start [rp-key [::a300-looper (next-id :a300-looper)]
            up-key (concat rp-key up-event)
@@ -155,7 +165,9 @@
                        :out-bus out-bus
                        :sync-bus sync-bus
                        :looped looped
-                       :buf-size buf-size)]
+                       :buf-size buf-size
+                       :player-target player-target
+                       :rec-target rec-target)]
 
           (on-event
             down-event

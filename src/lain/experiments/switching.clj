@@ -2,7 +2,7 @@
   (:require [clojure.string :refer [split]]
             [overtone.core :refer :all]
             [mecha.core :as mecha :refer [defmecha]]
-            [lain.a300]
+            [lain.a300.events]
             [lain.play :refer [ctl-player
                                buf-player]]
             [lain.control :refer [switch-controller

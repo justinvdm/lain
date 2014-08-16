@@ -2,10 +2,10 @@
   (:require [clojure.string :refer [split]]
             [overtone.core :refer :all]
             [mecha.core :as mecha :refer [defmecha]]
-            [lain.a300]
+            [lain.a300.events]
             [lain.play :refer [buf-player]]
             [lain.control :refer [param-controller
-                                       player-param-controller]]
+                                  player-param-controller]]
             [lain.utils :refer [load-note-samples]]))
 
 

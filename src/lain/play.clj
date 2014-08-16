@@ -78,7 +78,8 @@
 
 (defmecha key-player [player-fn & [down-event [:midi :key :down]
                                    up-event [:midi :key :up]
-                                   device-name nil]]
+                                   device-name nil
+                                   target [:tail 0]]]
 
   (:start [bend-offset (atom 0)
 
@@ -93,9 +94,9 @@
             (fn [{note :note
                   velocity-f :velocity-f}
                  params]
-              (apply player-fn (concat (bend-note note @bend-offset)
-                                       [:velocity-f velocity-f]
-                                       params)))
+              (apply player-fn target (concat (bend-note note @bend-offset)
+                                              [:velocity-f velocity-f]
+                                              params)))
 
             :up
             (fn [e node-id]
@@ -106,7 +107,8 @@
 
 (defmecha buf-player [player-fn bufs & [down-event [:midi :key :down]
                                         up-event [:midi :key :up]
-                                        device-name nil]]
+                                        device-name nil
+                                        target [:tail 0]]]
   (:start [super
            (player
              :buf-player
@@ -120,6 +122,7 @@
                   params]
                (when-let [buf (get bufs note)]
                  (apply player-fn
+                        target
                         :buf buf
                         :velocity-f velocity-f
                         params)))
@@ -133,7 +136,8 @@
 
 (defmecha perc-player [player-fns & [down-event [:midi :pad :down]
                                      up-event [:midi :pad :up]
-                                     device-name nil]]
+                                     device-name nil
+                                     target [:tail 0]]]
   (:start [super
            (player
              :perc-player
@@ -147,6 +151,7 @@
                   params]
                (when-let [player-fn (get player-fns note)]
                  (apply player-fn
+                        target
                         :velocity-f velocity-f
                         params))))]
           super))
@@ -154,7 +159,8 @@
 
 (defmecha mono-player [player-fn & [down-event [:midi :key :down]
                                     up-event [:midi :key :up]
-                                    device-name nil]]
+                                    device-name nil
+                                    target [:tail 0]]]
   (:start [node-id (atom nil)
 
            super
@@ -175,7 +181,7 @@
                                     params)]
                  (if (node-active? @node-id)
                    (apply ctl @node-id params))
-                 (reset! node-id (apply player-fn params))))
+                 (reset! node-id (apply player-fn target params))))
 
              :up
              (fn [e _]

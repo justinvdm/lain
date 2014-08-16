@@ -1,8 +1,8 @@
-(ns lain.a300-test
+(ns lain.a300.events-test
   (:require [speclj.core :refer :all]
             [overtone.libs.event :refer :all]
             [lain.test-init]
-            [lain.a300 :refer :all]))
+            [lain.a300.events :refer :all]))
 
 (defn fake-event
   [event-type

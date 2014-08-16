@@ -1,7 +1,7 @@
 (ns lain.experiments.buffers
   (:require [overtone.core :refer :all]
             [mecha.core :as mecha :refer [defmecha]]
-            [lain.a300]
+            [lain.a300.events]
             [lain.play :refer [buf-player]]
             [lain.insts :refer [buf-inst]]))
 
